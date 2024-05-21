@@ -108,4 +108,13 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
+
+    <style name="CustomChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="android:background">@drawable/chip_selector</item>
+        <item name="android:textColor">@color/blackText5</item>
+        <item name="android:textAppearance">@style/ChipTextAppearance</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="checkedIconVisible">false</item>
+    </style>
+
 </resources>

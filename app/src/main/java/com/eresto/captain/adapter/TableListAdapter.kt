@@ -44,6 +44,11 @@ class TableListAdapter(
         return TableRespoViewHolder(view)
     }
 
+    fun updateData(newTableList: List<GetTables>) {
+        list = newTableList
+        notifyDataSetChanged() // Notify adapter without changing the scroll position
+    }
+
     fun getData(): List<GetTables> {
         return list
     }

@@ -7,4 +7,10 @@
         android:title="NCV"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/pre_order"
+        android:icon="@drawable/contacts_black_24dp"
+        android:title="@string/cust_details"
+        app:showAsAction="always" />
+
 </menu>

@@ -2,6 +2,7 @@ package com.eresto.captain.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.budiyev.android.codescanner.AutoFocusMode
@@ -32,8 +33,8 @@ class ScannerActivity : AppCompatActivity() {
         codeScanner.isFlashEnabled = false // Whether to enable flash or not
         // Callbacks
         codeScanner.decodeCallback = DecodeCallback {
-
             runOnUiThread {
+                Log.e("hfksfhs", "Camera QR decode $it")
                 val returnIntent = Intent()
                 returnIntent.putExtra("data", it.text)
                 setResult(RESULT_OK, returnIntent)

@@ -79,7 +79,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         "local_id integer PRIMARY KEY AUTOINCREMENT," +
                         "id integer," +
                         "item_name text," +
-                        "item_price integer," +
+                        "item_price String," +
                         "item_cat_id integer," +
                         "menu_type integer," +
                         "kitchen_cat_id integer," +
@@ -95,7 +95,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         "kot_id integer," +
                         "item_name text," +
                         "item_short_name text," +
-                        "item_price integer," +
+                        "item_price String," +
                         "sp_inst text," +
                         "item_cat_id integer," +
                         "table_id integer," +
@@ -208,8 +208,8 @@ public class DBHelper extends SQLiteOpenHelper {
         query += (" (" +
                 list.getId() + ",'"
                 + replaceWithAphostrophy(list.getItem_name()) + "','"
-                + replaceWithAphostrophy(list.getItem_short_name()) + "',"
-                + list.getItem_price() + ",'"
+                + replaceWithAphostrophy(list.getItem_short_name()) + "','"
+                + list.getItem_price() + "','"
                 + replaceWithAphostrophy(list.getSp_inst()) + "',"
                 + list.getItem_cat_id() + ","
                 + list.getTable_id() + ","
@@ -263,8 +263,8 @@ public class DBHelper extends SQLiteOpenHelper {
         for (int i = 0; i < list.size(); i++) {
             query += (" ("
                     + list.get(i).getItem_id() + ",\""
-                    + replaceWithAphostrophy(list.get(i).getItem_name()) + "\","
-                    + list.get(i).getItem_price() + ",'"
+                    + replaceWithAphostrophy(list.get(i).getItem_name()) + "\",'"
+                    + list.get(i).getItem_price() + "','"
                     + replaceWithAphostrophy(list.get(i).getSp_inst()) + "',"
                     + list.get(i).getItem_cat_id() + ","
                     + list.get(i).getKitchen_cat_id() + ","
@@ -324,21 +324,24 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(query);
         return true;
     }
-    public int UpdateTable(int status,String table) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        int count=0;
-        if(table.isEmpty()){
-            ContentValues cv = new ContentValues();
-            cv.put("status", status);
-            count= db.update(TABLE_TABLE_NAME, cv, null,null);
-        }else{
-            String sql = "UPDATE "+TABLE_TABLE_NAME+" SET status = "+status+" WHERE id IN (" + table + ")";
-            db.execSQL(sql);
-            count=1;
+    public int UpdateTable(int status, String table) {
+        int count = 0;
+        try (SQLiteDatabase db = this.getWritableDatabase()) { // ✅ Auto-close db after use
+            if (table.isEmpty()) {
+                ContentValues cv = new ContentValues();
+                cv.put("status", status);
+                count = db.update(TABLE_TABLE_NAME, cv, null, null);
+            } else {
+                String sql = "UPDATE " + TABLE_TABLE_NAME + " SET status = ? WHERE id IN (" + table + ")";
+                db.execSQL(sql, new Object[]{status}); // ✅ Use parameterized query
+                count = 1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return count;
     }
+
 
     public int UpdateTableItem(CartItemRow list) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -355,6 +358,28 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.update(TABLE_ITEM, cv, "item_id = ? AND table_id = ?",
                 new String[]{String.valueOf(list.getId()), String.valueOf(list.getTable_id())});
     }
+    public int UpdateTableItemQty(CartItemRow list) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("qty", list.getQty()); // Only updating qty
+
+        return db.update(TABLE_ITEM, cv, "item_id = ? AND table_id = ?",
+                new String[]{String.valueOf(list.getId()), String.valueOf(list.getTable_id())});
+    }
+
+    public int UpdateTableItemsNcv(List<CartItemRow> items, int ncv) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        for (CartItemRow list : items) {
+            ContentValues cv = new ContentValues();
+            cv.put("ncv", ncv); // Only updating ncv
+
+            db.update(TABLE_ITEM, cv, "item_id = ? AND table_id = ?",
+                    new String[]{String.valueOf(list.getId()), String.valueOf(list.getTable_id())});
+        }
+        return 1;
+    }
+
+
 
     public int UpdateTableItems(List<CartItemRow> items) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -425,7 +450,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     res.getInt(res.getColumnIndex("kot_id")),
                     res.getString(res.getColumnIndex("item_name")),
                     res.getString(res.getColumnIndex("item_short_name")),
-                    res.getInt(res.getColumnIndex("item_price")),
+                    Double.parseDouble(res.getString(res.getColumnIndex("item_price"))),
                     res.getString(res.getColumnIndex("sp_inst")),
                     res.getInt(res.getColumnIndex("item_cat_id")),
                     res.getInt(res.getColumnIndex("table_id")),
@@ -454,7 +479,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     res.getInt(res.getColumnIndex("kot_id")),
                     res.getString(res.getColumnIndex("item_name")),
                     res.getString(res.getColumnIndex("item_short_name")),
-                    res.getInt(res.getColumnIndex("item_price")),
+                    Double.parseDouble(res.getString(res.getColumnIndex("item_price"))),
                     res.getString(res.getColumnIndex("sp_inst")),
                     res.getInt(res.getColumnIndex("item_cat_id")),
                     res.getInt(res.getColumnIndex("table_id")),
@@ -491,7 +516,7 @@ public class DBHelper extends SQLiteOpenHelper {
                             res.getInt(res.getColumnIndex("item_is_nonveg")),
                             0, 0,
                             res.getString(res.getColumnIndex("item_name")), "",
-                            res.getInt(res.getColumnIndex("item_price")), "",
+                             Double.parseDouble(res.getString(res.getColumnIndex("item_price"))), "",
                             "", "", "",
                             res.getString(res.getColumnIndex("sp_inst")),
                             "",
@@ -603,7 +628,8 @@ public class DBHelper extends SQLiteOpenHelper {
                             res.getInt(res.getColumnIndex("item_is_nonveg")),
                             0, 0,
                             res.getString(res.getColumnIndex("item_name")), "",
-                            res.getInt(res.getColumnIndex("item_price")), "",
+
+                    Double.parseDouble(res.getString(res.getColumnIndex("item_price"))),"",
                             "", "", "",
                             res.getString(res.getColumnIndex("sp_inst")),
                             "",
@@ -690,7 +716,8 @@ public class DBHelper extends SQLiteOpenHelper {
                             res.getInt(res.getColumnIndex("item_is_nonveg")),
                             0, 0,
                             res.getString(res.getColumnIndex("item_name")), "",
-                            res.getInt(res.getColumnIndex("item_price")), "",
+
+                    Double.parseDouble(res.getString(res.getColumnIndex("item_price"))), "",
                             "", "", "",
                             res.getString(res.getColumnIndex("sp_inst")),
                             "",
@@ -812,6 +839,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DELETE FROM " + TABLE_ITEM + " WHERE table_id = " + tableID + " AND item_id = " + itemId);
         db.close();
     }
+
+    
 
     public Integer deleteAllTables() {
         SQLiteDatabase db = this.getWritableDatabase();

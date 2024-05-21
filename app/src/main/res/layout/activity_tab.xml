@@ -14,6 +14,8 @@
         android:background="@color/color_white"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_user_avatar"
+        app:navigationContentDescription="@string/logout"
+        android:contentDescription="@string/logout"
         app:tabTextAppearance="@style/tabTextAppearance"
         app:titleTextColor="@color/colorSecondary" />
 

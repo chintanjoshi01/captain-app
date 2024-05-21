@@ -5,7 +5,7 @@ data class CartItemRow(
     val kot_id: Int,
     val item_name: String,
     val item_short_name: String,
-    var item_price: Int,
+    var item_price: Double,
     val sp_inst: String?,
     var item_cat_id: Int,
     val table_id: Int,

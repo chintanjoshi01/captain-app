@@ -94,9 +94,9 @@ data class KotInstance(
 data class ItemQSR(
     val id: Int,
     val item_id: Int,
-    val item_name: String,
+    var item_name: String,
     val order_date: String,
-    var price: Int,
+    var price: Double,
     var qty: Int,
     val short_name: String?,
     val is_delivered: Int,

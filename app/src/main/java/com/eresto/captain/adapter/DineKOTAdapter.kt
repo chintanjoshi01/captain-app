@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageButton
@@ -22,6 +23,7 @@ import com.eresto.captain.model.KotInstance
 import com.eresto.captain.utils.Utils
 import org.json.JSONArray
 import org.json.JSONException
+import java.util.Locale
 
 class DineKOTAdapter(
     var context: Context,
@@ -60,6 +62,7 @@ class DineKOTAdapter(
         internal var v = binding.root.findViewById<View>(R.id.v)
         internal var imageDeleteKotItem =
             binding.root.findViewById<ImageView>(R.id.image_deleteKotItem)
+        internal var linerLayout = binding.root.findViewById<LinearLayout>(R.id.lin)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -99,9 +102,14 @@ class DineKOTAdapter(
         if (menuList[position] is KotInstance) {
             val row = menuList[position] as KotInstance
             (holder as ViewHolderItemKot).textSectionTableName.text =
-                "-${row.short_name?:"-"}"
+                "-${row.short_name ?: "-"}"
             holder.textOrder.text = "#${row.instance}"
             holder.txtTime.text = Utils.getAgoTimeShort(row.kot_order_date)
+
+            if (row.soft_delete == 1){
+                holder.layout.visibility = View.GONE
+            }
+
 
             if (row.isExpanded) {
                 holder.recyclerViewItem!!.visibility = View.VISIBLE
@@ -181,7 +189,7 @@ class DineKOTAdapter(
             }
 
             holder.upArrowImg.setOnClickListener {
-                if (setOnItemClick != null) setOnItemClick!!.onPrintKOT(position,  row)
+                if (setOnItemClick != null) setOnItemClick!!.onPrintKOT(position, row)
             }
             holder.layout.setOnClickListener {
                 if (row.isExpanded) {
@@ -212,9 +220,12 @@ class DineKOTAdapter(
             }
         } else if (menuList[position] is ItemQSR) {
             val row = menuList[position] as ItemQSR
+            row.item_name = row.item_name.uppercase(Locale.US)
             (holder as ViewHolderOrderSub).txtSectionName.text = row.item_name
             holder.txtQty!!.text = "x${row.qty}"
-
+            if (row.soft_delete == 1){
+                holder.linerLayout.visibility = View.GONE
+            }
             if (row.sp_inst != null && row.sp_inst != "" && row.sp_inst != "[\"\"]") {
                 holder.textSPInst.visibility = View.VISIBLE
                 try {

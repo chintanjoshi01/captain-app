@@ -2,6 +2,7 @@ package com.eresto.captain.base
 
 import android.app.Activity
 import android.app.ActivityManager
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -12,27 +13,41 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.os.StrictMode
 import android.text.InputFilter
 import android.text.InputType
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.Window
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.eresto.captain.R
-import com.eresto.captain.model.*
+import com.eresto.captain.databinding.DialogPrinterAndKotSettingBinding
+import com.eresto.captain.model.CartItemRow
+import com.eresto.captain.model.DataInvoice
+import com.eresto.captain.model.InvoiceKot
+import com.eresto.captain.model.ItemQSR
+import com.eresto.captain.model.KotInstance
+import com.eresto.captain.model.Orders
+import com.eresto.captain.model.PrinterRespo
+import com.eresto.captain.model.TakeawayOrder
 import com.eresto.captain.ui.LoginActivity
 import com.eresto.captain.ui.MenuViewActivity
-import com.eresto.captain.ui.TabActivity
+import com.eresto.captain.ui.tables.TabActivity
 import com.eresto.captain.utils.DBHelper
+import com.eresto.captain.utils.FirebaseLogger
 import com.eresto.captain.utils.KeyUtils
 import com.eresto.captain.utils.Preferences
 import com.eresto.captain.utils.PrintMaster
@@ -42,18 +57,13 @@ import com.eresto.captain.utils.PrintMaster.Companion.SEPARATE
 import com.eresto.captain.utils.PrintMaster.Companion.SINGLE
 import com.eresto.captain.utils.SocketForegroundService
 import com.eresto.captain.utils.Utils
+import com.eresto.captain.utils.Utils.Companion.displayActionSnackbar
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.gson.Gson
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.PrintWriter
-import java.net.Socket
-import java.net.SocketException
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 import java.util.Objects
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
@@ -69,6 +79,11 @@ open class BaseActivity : AppCompatActivity() {
         val CLOSE_ORDER = 5
         val SHOW_PROGRESS = 6
         val HIDE_PROGRESS = 7
+        val LOGOUT = 8
+        val CUSTOMER_DETAILS = 9
+        var WARRING = 99
+
+
     }
 
     var db: DBHelper? = null
@@ -78,9 +93,11 @@ open class BaseActivity : AppCompatActivity() {
     var activity: Activity? = null
     var isTablet = false
     var restoCurrency = ""
-
-    var lastReceiver=""
+    var persons = 1
+    var lastReceiver = ""
     var currentActivity: AppCompatActivity? = null
+    private val _isConnected = MutableLiveData<Boolean>()
+    val isConnected: LiveData<Boolean> get() = _isConnected
     fun EditText.onlyUppercase() {
         inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
         filters = arrayOf(InputFilter.AllCaps())
@@ -88,6 +105,7 @@ open class BaseActivity : AppCompatActivity() {
 
     var serviceIntent: Intent? = null
     var service: SocketForegroundService? = null
+    var currentJsonData = JSONObject()
 
     val states =
         arrayOf(
@@ -97,7 +115,8 @@ open class BaseActivity : AppCompatActivity() {
             intArrayOf(android.R.attr.state_pressed)
         )
     var mOnDialogClick: OnResponseFromServerPOS? = null
-var isBroadcastSet=false
+    var isBroadcastSet = false
+
     interface OnResponseFromServerPOS {
         fun onResponse(json: String)
     }
@@ -170,38 +189,64 @@ var isBroadcastSet=false
         super.onDestroy()
     }
 
-     val broadcastReceiver = object : BroadcastReceiver() {
+    val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == lastReceiver) {
                 if (!intent.getStringExtra("error").isNullOrEmpty()) {
+                    _isConnected.postValue(false);
                     val message = intent.getStringExtra("error")!!
-                    displayActionSnackbarBottom(
+                    val isTryAgain = intent.getBooleanExtra("is_try_again", false)
+                    val retryCount = intent.getIntExtra("retryCont", 0)
+                    displayActionReconnectSnackbarBottom(
                         this@BaseActivity,
                         message,
                         2,
                         false,
-                        "Reconnect",
+                        if (isTryAgain) "Retry" else "Reconnect",
                         object : OnDialogClick {
                             override fun onOk() {
-                                pref!!.clearSharedPreference(this@BaseActivity)
-                                val bool = db!!.DeleteDB()
-                                if (currentActivity is MenuViewActivity) {
-                                    val resultIntent = Intent()
-                                    resultIntent.putExtra("exit", true)
-                                    setResult(Activity.RESULT_OK, resultIntent)
-                                } else {
-                                    val mIntent =
-                                        Intent(this@BaseActivity, LoginActivity::class.java)
-                                    startActivity(mIntent)
+                                try{
+                                    if (isTryAgain && retryCount < 3) {
+//                                    showProgressDialog(this@BaseActivity)
+                                        service!!.makeConnection(context, currentJsonData)
+                                    } else if (isTryAgain) {
+                                        dismissProgressDialog()
+                                        sendMessageToServer(currentJsonData, lastReceiver)
+                                    } else {
+                                        pref!!.clearSharedPreference(this@BaseActivity)
+                                        val bool = db!!.DeleteDB()
+                                        if (currentActivity is MenuViewActivity) {
+                                            val jsonObj = JSONObject()
+                                            jsonObj.put("ca", CONNECT)//action
+                                            jsonObj.put(
+                                                "ui",
+                                                pref!!.getInt(this@BaseActivity, "user_id")
+                                            )//user_id
+                                            jsonObj.put("imei", Utils.getIMEI(this@BaseActivity))//imei
+                                            jsonObj.put("di", "${Build.MODEL}")//device_info
+                                            sendMessageToServer(
+                                                jsonObj,
+                                                SocketForegroundService.ACTION_LOGIN
+                                            )
+                                        } else {
+                                            val mIntent =
+                                                Intent(this@BaseActivity, LoginActivity::class.java)
+                                            startActivity(mIntent)
+                                        }
+                                        finish()
+                                    }
+                                } catch (e: Exception){
+                                    FirebaseLogger.logException(e, "displayActionReconnectSnackbarBottom")
                                 }
-                                finish()
-                            }
 
+                            }
                             override fun onCancel() {
                                 finish()
                             }
                         })
                 } else {
+                    _isConnected.postValue(true);
+//                    dismissProgressDialog()
                     val action = JSONObject(intent.getStringExtra("ua")!!)
                     val sendMessage = action.getInt("aa")
                     when (sendMessage) {
@@ -226,6 +271,7 @@ var isBroadcastSet=false
                             dismissOfflineProgressDialog()
                             mOnDialogClick!!.onResponse("")
                         }
+
                         CLOSE_ORDER -> {
                             dismissOfflineProgressDialog()
                             mOnDialogClick!!.onResponse("")
@@ -237,8 +283,8 @@ var isBroadcastSet=false
                         }
 
                         KOT -> {
-
-                            val message = JSONObject(intent.getStringExtra("pv")!!).getJSONObject("pv")
+                            val message =
+                                JSONObject(intent.getStringExtra("pv")!!).getJSONObject("pv")
                             if (message.has("kot") && message.getJSONObject("kot").length() != 0) {
                                 val kot = message.getJSONObject("kot")
                                 pref!!.setBool(
@@ -255,6 +301,12 @@ var isBroadcastSet=false
                                     this@BaseActivity,
                                     kot.getInt("ktp"),
                                     "kot_type_printer"
+                                )
+                                pref!!.setInt(
+                                    this@BaseActivity,
+                                    kot.getJSONObject("print")
+                                        .getInt("kdt"),
+                                    "kot_design_type"
                                 )
                                 pref!!.setInt(
                                     this@BaseActivity,
@@ -276,6 +328,11 @@ var isBroadcastSet=false
                                     kot.getString("kit_cat_print"),
                                     "kit_cat_print"
                                 )
+                                pref!!.setStr(
+                                    this@BaseActivity,
+                                    kot.getString("kdt"),
+                                    "kot_design_type"
+                                )
                             }
 //                            val gson = Gson()
 //                            val response = gson.fromJson(
@@ -283,9 +340,18 @@ var isBroadcastSet=false
 //                                SubmitNewOrderKOT::class.java
 //                            )
 
-                            printKOT(message.getString("kot_instance_id"), action.getJSONObject("cv").getInt("table_id"), action.getJSONObject("cv").getInt("type"))
+                            printKOT(
+                                message.getString("kot_instance_id"),
+                                action.getJSONObject("cv").getInt("table_id"),
+                                action.getJSONObject("cv").getInt("type")
+
+                            )
                         }
 
+                        LOGOUT -> {
+                            dismissOfflineProgressDialog()
+                            mOnDialogClick!!.onResponse(intent.getStringExtra("pv")!!)
+                        }
 
                     }
                 }
@@ -444,6 +510,52 @@ var isBroadcastSet=false
         }
     }
 
+    fun displayActionReconnectSnackbarBottom(
+        activity: Activity?,
+        message: String,
+        type: Int,
+        showCancel: Boolean,
+        okButtonText: String,
+        onDialogClick: OnDialogClick
+    ) {
+        try {
+            _isConnected.postValue(false);
+            val dialog = BottomSheetDialog(activity!!)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.setContentView(R.layout.dialog_snack_bottom_reconnect)
+            dialog.setCancelable(false)
+            dialog.setCanceledOnTouchOutside(false)
+            val img = dialog.findViewById<ImageView>(R.id.img)
+
+            val txtStandard = dialog.findViewById<TextView>(R.id.txt_standard)
+            txtStandard!!.text = message
+
+            val btnAddSession = dialog.findViewById<AppCompatButton>(R.id.btn_add_session)
+            val btnCancel = dialog.findViewById<AppCompatButton>(R.id.btn_cancel)
+            btnAddSession!!.text = okButtonText
+            btnCancel!!.visibility = View.VISIBLE
+
+            btnAddSession.setOnClickListener {
+                onDialogClick.onOk()
+                dialog.cancel()
+            }
+            btnCancel.setOnClickListener {
+                onDialogClick.onCancel()
+                dialog.cancel()
+            }
+
+            Objects.requireNonNull(dialog.window)
+                ?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.window!!.setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
+            dialog.show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun isServiceRunning(context: Context): Boolean {
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -454,20 +566,20 @@ var isBroadcastSet=false
         return false
     }
 
-    fun sendMessageToServer(jsonObj: JSONObject,action:String) {
+    fun sendMessageToServer(jsonObj: JSONObject, action: String) {
         if (service == null) {
             serviceIntent = Intent(this, SocketForegroundService::class.java)
+            Log.e("kadjajdjd", "Action ::: $action")
+            Log.e("kadjajdjd", "Sending message ::: $jsonObj")
             serviceIntent!!.putExtra("json", jsonObj.toString())
             ContextCompat.startForegroundService(this, serviceIntent!!)
-
             service = SocketForegroundService()
         } else {
             service!!.makeConnection(this, jsonObj)
         }
-        lastReceiver=action
-        SocketForegroundService.CURRENT_ACTION =action
-
-        isBroadcastSet=true
+        lastReceiver = action
+        SocketForegroundService.CURRENT_ACTION = action
+        isBroadcastSet = true
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(
                 broadcastReceiver,
@@ -535,7 +647,7 @@ var isBroadcastSet=false
                 ItemQSR(
                     0,
                     item.id,
-                    item.item_name,
+                    item.item_name.uppercase(Locale.US),
                     strDate,
                     item.item_price,
                     item.qty,
@@ -568,47 +680,175 @@ var isBroadcastSet=false
             )
         db!!.deleteItemOfTable(tableId)
         if (pref!!.getBool(this, "prn_setting")) {
-
             val printKOTSubmission =
                 pref!!.getBool(this, "kot_print_submission")
             val printInvoiceSubmission =
                 pref!!.getBool(this, "invoice_print_submission")
-
+            val isDefaultSetting = pref!!.getBool(this, "isDefaultPrinterSetting")
+            Log.e("hfhskfhs", "Is Default Setting ::: $isDefaultSetting")
             if (printKOTSubmission) {
                 val printerList = db!!.GetPrinters()
                 if (printerList.isNotEmpty()) {
-                    printKOTMain(
-                        kot,
-                        null,
-                        null,
-                        null,
-                        null,
-                        table.tab_label,
-                        1, "" ?: "",
-                        type,
-                        object :
-                            OnDialogClick {
-                            override fun onOk() {
-                                dismissProgressDialog()
-                                finish()
-                            }
+                    if (!isDefaultSetting) {
+                        dialogDefaultPrinterSetting(this)
+                    } else {
+                        printKOTMain(
+                            kot,
+                            null,
+                            null,
+                            null,
+                            null,
+                            table.tab_label,
+                            strPerson = persons, "" ?: "",
+                            type,
+                            object :
+                                OnDialogClick {
+                                override fun onOk() {
+                                    dismissProgressDialog()
+                                    val resultIntent = Intent()
+                                    resultIntent.putExtra("exit", true)
+                                    setResult(Activity.RESULT_OK, resultIntent)
+                                    finish()
+                                }
 
-                            override fun onCancel() {
-                                dismissProgressDialog()
-                                finish()
-                            }
-                        })
+                                override fun onCancel() {
+                                    dismissProgressDialog()
+                                    val resultIntent = Intent()
+                                    resultIntent.putExtra("exit", true)
+                                    setResult(Activity.RESULT_OK, resultIntent)
+                                    finish()
+                                }
+                            })
+                    }
                 }
+                persons = 1
             } else {
                 dismissProgressDialog()
                 finish()
             }
-
         } else {
             dismissProgressDialog()
             finish()
         }
     }
+
+    fun dialogDefaultPrinterSetting(context: Context) {
+        val binding = DialogPrinterAndKotSettingBinding.inflate(LayoutInflater.from(context))
+        val dialog = AlertDialog.Builder(context)
+            .setView(binding.root)
+            .create()
+        dialog.setCancelable(false)
+        var kotTypePrinter = pref!!.getInt(context, "kot_type_printer")
+        var kotDefaultPrinter = pref!!.getInt(context, "kot_default_printer")
+        var kotDesignTypePrinter = pref!!.getInt(context, "kot_design_type")
+        if (kotDesignTypePrinter == 0) {
+            kotDesignTypePrinter = 1
+        }
+        binding.cbKotPrintSubmission.isChecked = pref!!.getBool(context, "kot_print_submission")
+
+        val designPrinterType: Array<String> =
+            resources.getStringArray(R.array.printer_design_type)
+        binding.kotPrinterDesignType.setText(
+            designPrinterType[kotDesignTypePrinter - 1]
+        )
+        val defaultPrinterType: Array<String> = resources.getStringArray(R.array.printer_type)
+        binding.kotPrinterType.setText(
+            defaultPrinterType[pref!!.getInt(
+                context,
+                "kot_type_printer"
+            )]
+        )
+        val printerList = db!!.GetPrinters()
+        val defaultPrinter: Array<String> = Array(printerList.size) { "" }
+        for (i in printerList.indices) {
+            defaultPrinter[i] = (printerList[i].printer_name)
+        }
+        binding.kotDefaultPrinter.setText(
+            if (pref!!.getInt(context, "kot_default_printer") != 0) {
+                findPrinter(
+                    pref!!.getInt(context, "kot_default_printer"),
+                    printerList
+                )?.printer_name
+            } else ""
+        )
+        setupAutoCompleteTextView(context, binding.kotDefaultPrinter, defaultPrinter) { _, result ->
+            kotDefaultPrinter = printerList[result.position].id
+        }
+        setupAutoCompleteTextView(
+            context,
+            binding.kotPrinterType,
+            defaultPrinterType
+        ) { _, result ->
+            kotTypePrinter = result.position
+        }
+        setupAutoCompleteTextView(
+            context,
+            binding.kotPrinterDesignType,
+            designPrinterType
+        ) { _, result ->
+            kotDesignTypePrinter = result.position + 1
+        }
+
+
+        binding.cbKitchenCat.setOnCheckedChangeListener { _, isChecked ->
+            binding.linKitchenCat.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        binding.cbKitchenCatSection.setOnCheckedChangeListener { _, isChecked ->
+            binding.linPrinterSection.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        binding.txtMinus.setOnClickListener {
+            val currentCount = binding.txtKotPrint.text.toString().toIntOrNull() ?: 0
+            if (currentCount > 0) {
+                binding.txtKotPrint.setText((currentCount - 1).toString())
+            }
+        }
+
+        binding.txtPlus.setOnClickListener {
+            val currentCount = binding.txtKotPrint.text.toString().toIntOrNull() ?: 0
+            binding.txtKotPrint.setText((currentCount + 1).toString())
+        }
+
+        binding.tvCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        binding.tvSave.setOnClickListener {
+            pref!!.setBool(context, true, "cb_kot")
+            pref!!.setBool(context, binding.cbKotPrintSubmission.isChecked, "kot_print_submission")
+            pref!!.setInt(context, kotTypePrinter, "kot_type_printer")
+            pref!!.setInt(context, kotDefaultPrinter, "kot_default_printer")
+            pref!!.setInt(context, binding.txtKotPrint.text.toString().toInt(), "kot_copies")
+            pref!!.setInt(context, kotDesignTypePrinter, "kot_design_type")
+            pref!!.setBool(context, true, "isDefaultPrinterSetting")
+            displayActionSnackbar(this, "Printer settings has been updated", 1)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(R.drawable.shape_grey_border_white)
+
+    }
+
+    data class AutoCompleteResult(val position: Int, val name: String)
+
+    private fun setupAutoCompleteTextView(
+        context: Context,
+        autoCompleteTextView: AutoCompleteTextView,
+        items: Array<String>,
+        onItemSelected: (autoCompleteId: Int, result: AutoCompleteResult) -> Unit
+    ) {
+        val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, items)
+        autoCompleteTextView.setAdapter(adapter)
+
+        autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
+            val selectedItem = items[position]
+            val result = AutoCompleteResult(position, selectedItem)
+            onItemSelected(autoCompleteTextView.id, result)
+        }
+    }
+
 
     fun printKOTMain(
         kot: KotInstance?,
@@ -627,16 +867,15 @@ var isBroadcastSet=false
                 this,
                 "invoice_type_printer"
             ) else pref!!.getInt(this, "kot_type_printer")
+        val isDefaultSetting = pref!!.getBool(this, "isDefaultPrinterSetting")
         if (pref!!.getBool(this, "prn_setting")) {
             val printerList = db!!.GetPrinters()
-
             if (type == 0) {
                 val printSubmission = pref!!.getBool(this, "kot_print_submission")
                 if (printSubmission) {
                     val kotType = pref!!.getInt(this, "kot_type_printer")
                     val defaultPrinter = pref!!.getInt(this, "kot_default_printer")
                     val kitchenPrint = pref!!.getInt(this, "kitchen_print")
-
                     if (kotType == 0) {
                         if (defaultPrinter != 0) {
                             val printer = findPrinter(defaultPrinter, printerList)
@@ -855,26 +1094,32 @@ var isBroadcastSet=false
                     onDialogClick.onOk()
                 }
             } else {
-                if (orders == null) {
-                    Utils.selectPrinter(
-                        this,
-                        kot,
-                        null,
-                        kotTakeaway,
-                        null,
-                        tableName,
-                        strPerson,
-                        custAddress,
-                        orderType,
-                        printerList
-                    ) {
-                        onDialogClick.onOk()
-                    }
+                if (!isDefaultSetting) {
+                    dialogDefaultPrinterSetting(this)
                 } else {
-                    Utils.selectPrinter(this, orders, tableName, printerList) {
-                        onDialogClick.onOk()
+                    if (orders == null) {
+                        Utils.selectPrinter(
+                            this,
+                            kot,
+                            null,
+                            kotTakeaway,
+                            null,
+                            tableName,
+                            strPerson,
+                            custAddress,
+                            orderType,
+                            printerList
+                        ) {
+                            onDialogClick.onOk()
+                        }
+                    } else {
+                        Utils.selectPrinter(this, orders, tableName, printerList) {
+                            onDialogClick.onOk()
+                        }
                     }
                 }
+//                dialogDefaultPrinterSetting(this)
+
             }
         }
     }

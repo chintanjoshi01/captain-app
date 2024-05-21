@@ -57,4 +57,33 @@
     <string name="create_invoice_template">Create Invoice Template</string>
     <string name="lbl_kot_caps">KOT</string>
     <string name="create_invoice">Create Invoice</string>
+    <string name="regular">Regular</string>
+    <string name="cust_details">Customer Detials</string>
+    <string name="mobile_number">Contact No</string>
+    <string name="name">Name</string>
+    <string name="pax">Pax</string>
+    <string name="address">Address</string>
+    <string name="gst_number">GST Number</string>
+    <string name="kitchen_category_wise_print">Kitchen Category wise Print</string>
+    <string name="for_better_performance_assign_kitchen_ncategory_to_all_menu_item">For Better Performance assign kitchen\\ncategory to all menu item.</string>
+    <string name="kitchen_category_section_wise_print">Kitchen Category Section wise Print</string>
+    <string name="select_default_printer">Select Default Printer</string>
+    <string name="select_print_action">Select Print Action</string>
+    <string name="print_kot_on_submit_kot">Print KOT on Submit KOT</string>
+    <string name="number_of_copies">No. Of Copies</string>
+    <string name="select_kitchen_print_type">Select Kitchen Print Type</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="step_3">Tap the Login Button below\n</string>
+    <string name="profile">Profile</string>
+    <string name="logout">Logout</string>
+    <string-array name="printer_design_type">
+        <item>KOT 1</item>
+        <item>KOT 2</item>
+    </string-array>
+
+    <string-array name="printer_type">
+        <item>Direct Print to Default Printer</item>
+        <item>Select Printer on Every Print</item>
+    </string-array>
 </resources>
