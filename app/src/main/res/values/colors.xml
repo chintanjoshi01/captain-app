@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#AB2421</color>
+    <color name="colorAccent">#AB2421</color>
+    <color name="color_white">#FFFFFF</color>
+    <color name="color_black">#000000</color>
+    <color name="light_pink">#FBE9E7</color>
+    <color name="pink">#14AB2421</color>
+    <color name="colorSecondary">#4C4C4C</color>
+    <color name="colorSecondaryVariant">#787878</color>
+    <color name="colorSecondaryVariantFade">#BF787878</color>
+    <!--<color name="colorSecondaryVariant">#77617C</color>-->
+    <color name="colorSecondaryVariant_light">#B3B3B3</color>
+    <color name="colorSecondaryVariant_light1">#A4B3B3B3</color>
+    <color name="colorSecondaryVariant_light2">#F1F1F1</color>
+    <color name="colorSecondaryVariant_light3">#CDF1F1F1</color>
+    <color name="color_light_pink_fade">#FFEDED</color>
+    <color name="color_light_pink">#0AFA6515</color>
+    <color name="color_gray_light">#4D4C4C4C</color>
+    <color name="present">#5EA17F</color>
+    <color name="absent">#F5695A</color>
+    <color name="short_day">#4C4C4C</color>
+    <color name="missed_punch_out">#F5CE5F</color>
+    <color name="missed_punch_out_fade">#66F5CE5F</color>
+    <color name="golden_color">#FDEFC5</color>
+    <color name="light_yellow">#FDEFC5</color>
+    <color name="light_red">#FFD2CE</color>
+    <color name="red_double">#D17C75</color>
+    <color name="light_grey">#F2F2F2</color>
+
+    <color name="blackText1">#262626</color>
+    <color name="blackText1_5">#424242</color>
+    <color name="blackText2">#616161</color>
+    <color name="blackText3">#8e8f91</color>
+    <color name="blackText4">#c0c4c9</color>
+    <color name="blackText5">#787878</color>
+    <color name="greenText">#4DA361</color>
+    <color name="greenText_fade">#144DA361</color>
+    <color name="yellowText">#D19D18</color>
+    <color name="redText">#D34949</color>
+    <color name="font_dark">#F0F0F0</color>
+
+    <color name="color_pendingItem_LightRed">#FCC4B6</color>
+    <color name="main_bg_color">#EEEEF0</color>
+    <color name="transparent">#00000000</color>
+    <color name="colorSecondary_70">#704C4C4C</color>
+    <color name="login_bg">#E5E5E5</color>
+    <color name="color_light_grey">#F1F1F1</color>
+    <color name="dark_blue1">#1F166F</color>
+    <color name="color_check">#B5F5D1</color>
+    <color name="color_pending">#FDF6E4</color>
+    <color name="color_delete">#FFEFEE</color>
+    <color name="color_menu_shape">#4C4C4C</color>
+</resources>

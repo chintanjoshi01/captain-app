@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    tools:context=".ui.LoginActivity">
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/img"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img_captain" />
+
+    <ImageView
+        android:layout_alignBottom="@+id/img"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:src="@drawable/vect_fade" />
+</RelativeLayout>
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/_16sdp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_logo" />
+
+    <TextView
+        android:id="@+id/txt_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_16sdp"
+        android:fontFamily="@font/nunito_bold"
+        android:textColor="@color/blackText1"
+        android:text="Welcome to Eresto Captain"
+        android:textSize="@dimen/_16sdp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/blackText1"
+        android:layout_margin="@dimen/_8sdp"
+        android:fontFamily="@font/nunito_regular"
+        android:text="Select the User on POS Machine to show\nLogin QR Code and Tap the Login "
+        android:textSize="@dimen/_12sdp" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/connectButton"
+        android:layout_margin="@dimen/_16sdp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/color_white"
+        android:textSize="@dimen/_12sdp"
+        android:text="Scan the QR Code" />
+
+</LinearLayout>

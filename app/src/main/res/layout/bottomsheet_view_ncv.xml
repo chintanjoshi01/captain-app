@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/bottomSheet"
+    android:background="@drawable/ic_white_bg_corner"
+    android:orientation="vertical"
+    android:padding="@dimen/_8sdp">
+
+    <TextView
+        android:id="@+id/txt_regular"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_grey_border_white"
+        android:drawablePadding="@dimen/_8sdp"
+        android:padding="@dimen/_12sdp"
+        android:text="Regular"
+        android:textSize="@dimen/_12sdp"
+        app:drawableStartCompat="@drawable/ic_regular" />
+
+    <TextView
+        android:id="@+id/txt_no_charge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/shape_grey_border_white"
+        android:drawablePadding="@dimen/_8sdp"
+        android:padding="@dimen/_12sdp"
+        android:text="No Charge"
+        android:textSize="@dimen/_12sdp"
+        app:drawableStartCompat="@drawable/ic_no_charge" />
+
+    <TextView
+        android:id="@+id/txt_complimentary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/shape_grey_border_white"
+        android:drawablePadding="@dimen/_8sdp"
+        android:padding="@dimen/_12sdp"
+        android:text="Complimentary"
+        android:textSize="@dimen/_12sdp"
+        app:drawableStartCompat="@drawable/ic_complementary" />
+
+    <TextView
+        android:id="@+id/txt_void"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/shape_grey_border_white"
+        android:drawablePadding="@dimen/_8sdp"
+        android:padding="@dimen/_12sdp"
+        android:text="Void"
+        android:textSize="@dimen/_12sdp"
+        app:drawableStartCompat="@drawable/ic_void" />
+</LinearLayout>

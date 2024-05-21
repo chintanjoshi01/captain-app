@@ -1,0 +1,60 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Captain</string>
+    <string name="tables_not_available">Tables Not Available</string>
+
+    <string name="by_item_name">By Item Name</string>
+    <string name="by_item_group">By Item Group</string>
+    <string name="are_you_sure_do_you_want_to_delete_this_entry">Are you sure? Do you want to delete this entry?</string>
+
+    <string name="special_instruction">Special Instruction</string>
+    <string name="special_instructions">Special Instructions</string>
+    <string name="short_description">Short Description</string>
+    <string name="ingradients">Ingredients</string>
+    <string name="item_image">Item Image</string>
+
+    <string name="qty">QTY</string>
+    <string name="no_charge">No Charge</string>
+    <string name="complimentary">Complimentary</string>
+    <string name="lbl_void">Void</string>
+    <string name="enter_special_instruction_name">Enter Special Instruction Name</string>
+    <string name="select_special_instruction">Select Special Instruction</string>
+
+    <string name="printer_not_connected">Printer Not Connected</string>
+    <string name="permission_granted_try_print_now">Permission Granted, Try Print Now</string>
+    <string name="select_printer_to_print_kots">Select Printer to Print KOTs</string>
+    <string name="select_printer_to_print_kot">Select Printer to Print KOT</string>
+    <string name="select_printer_to_print_invoice">Select Printer to Print Invoice</string>
+    <string name="permission_not_granted">Permission not granted</string>
+    <string name="printer_not_found">Printer not Found</string>
+
+    <string name="select_printer">Select Printer</string>
+
+    <string name="cancel_caps" tools:ignore="ButtonCase">CANCEL</string>
+    <string name="ok">OK</string>
+    <string name="this_is_mobile_app_you_cant_use_in_tablet">This is mobile app you can\'t use in tablet, Kindly download tablet app from the Play Store</string>
+
+    <string name="download">Download</string>
+
+    <string name="printing_in_progress">Printing in progress…</string>
+    <string name="connecting_printer">Connecting printer…</string>
+    <string name="printer_is_connected">Printer is connected…</string>
+    <string name="printer_is_printing">Printer is printing…</string>
+    <string name="printer_has_finished">Printer has finished…</string>
+
+
+    <string name="failed">Failed</string>
+    <string name="the_application_cant_find_any_printer_connected">The application can\'t find any printer connected</string>
+    <string name="retry_small_caps">Retry</string>
+    <string name="unable_to_connect_the_printer">Unable to connect the printer.</string>
+    <string name="it_seems_to_be_an_invalid_syntax_problem">It seems to be an invalid syntax problem.</string>
+    <string name="the_selected_encoding_character_returning_an_error">The selected encoding character returning an error.</string>
+    <string name="data_send_to_be_converted_to_barcode_or_qr_code_seems_to_be_invalid">Data send to be converted to barcode or QR code seems to be invalid.</string>
+    <string name="your_session_is_expire_login_again">Your Session is Expired, Login Again</string>
+    <string name="back">Back</string>
+    <string name="scanner_error_message">Error While Scanning</string>
+    <string name="logout_message">Are you sure from Log out this app.</string>
+    <string name="lbl_close_order">Close Order</string>
+    <string name="create_invoice_template">Create Invoice Template</string>
+    <string name="lbl_kot_caps">KOT</string>
+    <string name="create_invoice">Create Invoice</string>
+</resources>

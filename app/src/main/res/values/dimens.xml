@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- standard metrics -->
+    <dimen name="spacing_large">32dp</dimen>
+    <dimen name="spacing_xxlarge">74dp</dimen>
+    <dimen name="labeled_default_width">72dp</dimen>
+    <dimen name="labeled_default_height">32dp</dimen>
+    <dimen name="day_night_default_width">84dp</dimen>
+    <dimen name="day_night_default_height">48dp</dimen>
+
+
+    <dimen name="spacing_medium">20dp</dimen>
+    <dimen name="spacing_large_60">60dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+
+
+    <!-- dateTitleLayout -->
+    <dimen name="text_size_title">22sp</dimen>
+    <dimen name="dateTitlePaddingBottom">5dp</dimen>
+    <!-- weekLayout -->
+    <dimen name="text_size_week">15sp</dimen>
+    <!-- weekRowLayout -->
+    <dimen name="weekRowMinHeight">44dp</dimen>
+    <dimen name="text_size_date">18sp</dimen>
+    <dimen name="dayOfMonthBoxSize">44dp</dimen>
+    <dimen name="dayOfMonthSize">34dp</dimen>
+    <dimen name="dayOfMonthMinWidth">50dp</dimen>
+    <dimen name="dayOfMonthMinHeight">0dp</dimen>
+    <dimen name="dayOfMonthPaddingBottom">0dp</dimen>
+    <dimen name="strip_height">28dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="appbar_padding">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="toolbar_height">@dimen/_48sdp</dimen>
+
+    <dimen name="toolbar_back_icon_size">@dimen/_28sdp</dimen>
+    <dimen name="border_width_chips">@dimen/_1sdp</dimen>
+    <dimen name="border_corner_chips">@dimen/_5sdp</dimen>
+
+</resources>

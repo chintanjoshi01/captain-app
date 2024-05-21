@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/_8sdp"
+    android:orientation="vertical"
+    android:padding="@dimen/_5sdp">
+
+    <ImageView
+        android:id="@+id/img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/ic_pink_circle"
+        android:padding="@dimen/_12sdp"
+        android:src="@drawable/ic_delete_black"
+        app:tint="@color/colorPrimary" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:padding="@dimen/_5sdp"
+        android:textColor="@color/colorSecondary"
+        android:textSize="@dimen/_14sdp"
+        app:fontFamily="@font/nunito_regular" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/color_white"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/_4sdp"
+        android:paddingBottom="@dimen/_8sdp"
+        android:weightSum="2">
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_4sdp"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_weight="1"
+            android:background="@drawable/layout_red_border_corner_fill_white"
+            android:fontFamily="@font/nunito_semibold"
+            android:gravity="center"
+            android:padding="@dimen/_8sdp"
+            android:singleLine="true"
+            android:text="No"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/_12sdp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_yes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:layout_weight="1"
+            android:background="@drawable/layout_red_border_corner_fill_white"
+            android:backgroundTint="@color/colorPrimary"
+            android:fontFamily="@font/nunito_semibold"
+            android:gravity="center"
+            android:padding="@dimen/_8sdp"
+            android:singleLine="true"
+            android:text="Delete"
+            android:textColor="@color/color_white"
+            android:textSize="@dimen/_12sdp"
+            app:drawableTint="@color/color_white" />
+
+    </LinearLayout>
+</LinearLayout>
