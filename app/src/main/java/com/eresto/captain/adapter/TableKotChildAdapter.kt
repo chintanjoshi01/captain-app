@@ -71,18 +71,19 @@ class TableKotChildAdapter(
         holder.binding.imgPlus.setOnClickListener {
             holder.binding.imgMinus.visibility = View.VISIBLE
             holder.binding.count.visibility = View.VISIBLE
-            row.count = row.count + 1
+            row.count += 1
             notifyItemChanged(position)
             setOnItemClick!!.onItemUpdate(position, row, row.count)
         }
         holder.binding.imgMinus.setOnClickListener {
-            row.count = row.count - 1
+            row.count -= 1
             notifyItemChanged(position)
             if (row.count > 0) {
                 setOnItemClick!!.onItemUpdate(position, row, row.count)
             } else {
                 row.isChecked = false
                 setOnItemClick!!.onItemDelete(position, row, row.count)
+                notifyDataSetChanged()
             }
         }
         holder.binding.cbCat.visibility = View.GONE

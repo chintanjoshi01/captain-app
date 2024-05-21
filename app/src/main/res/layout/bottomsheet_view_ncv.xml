@@ -1,57 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/bottomSheet"
-    android:background="@drawable/ic_white_bg_corner"
     android:orientation="vertical"
-    android:padding="@dimen/_8sdp">
+    android:padding="16dp">
 
-    <TextView
-        android:id="@+id/txt_regular"
+    <!-- Buttons in a Grid Layout -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_grey_border_white"
-        android:drawablePadding="@dimen/_8sdp"
-        android:padding="@dimen/_12sdp"
-        android:text="Regular"
-        android:textSize="@dimen/_12sdp"
-        app:drawableStartCompat="@drawable/ic_regular" />
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="2">
 
-    <TextView
-        android:id="@+id/txt_no_charge"
+        <!-- Regular Button -->
+        <LinearLayout
+            android:id="@+id/btn_regular"
+            style="@style/view_ncv_new_layout_style">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/ic_regular" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/regular"
+                android:fontFamily="@font/nunito_bold"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- No Charge Button -->
+        <LinearLayout
+            android:id="@+id/btn_no_charge"
+            style="@style/view_ncv_new_layout_style">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/ic_no_charge" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/no_charge"
+                android:fontFamily="@font/nunito_bold"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:background="@drawable/shape_grey_border_white"
-        android:drawablePadding="@dimen/_8sdp"
-        android:padding="@dimen/_12sdp"
-        android:text="No Charge"
-        android:textSize="@dimen/_12sdp"
-        app:drawableStartCompat="@drawable/ic_no_charge" />
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="2">
 
-    <TextView
-        android:id="@+id/txt_complimentary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:background="@drawable/shape_grey_border_white"
-        android:drawablePadding="@dimen/_8sdp"
-        android:padding="@dimen/_12sdp"
-        android:text="Complimentary"
-        android:textSize="@dimen/_12sdp"
-        app:drawableStartCompat="@drawable/ic_complementary" />
+        <!-- Complimentary Button -->
+        <LinearLayout
+            android:id="@+id/btn_complimentary"
+            style="@style/view_ncv_new_layout_style">
 
-    <TextView
-        android:id="@+id/txt_void"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:background="@drawable/shape_grey_border_white"
-        android:drawablePadding="@dimen/_8sdp"
-        android:padding="@dimen/_12sdp"
-        android:text="Void"
-        android:textSize="@dimen/_12sdp"
-        app:drawableStartCompat="@drawable/ic_void" />
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/ic_complementary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/complimentary"
+                android:fontFamily="@font/nunito_bold"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Void Button -->
+        <LinearLayout
+            android:id="@+id/btn_void"
+            style="@style/view_ncv_new_layout_style">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/ic_void" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/lbl_void"
+                android:fontFamily="@font/nunito_bold"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

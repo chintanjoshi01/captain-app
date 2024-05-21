@@ -119,11 +119,11 @@
                 android:layout_marginEnd="@dimen/_4sdp"
                 android:layout_marginBottom="@dimen/_8sdp"
                 android:layout_weight="1"
-                android:background="@drawable/shape_red_border_round"
+                android:background="@drawable/shape_red_fill_round"
                 android:paddingStart="@dimen/_16sdp"
                 android:paddingEnd="@dimen/_16sdp"
                 android:text="@string/lbl_close_order"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/color_white"
                 android:visibility="gone" />
 
             <androidx.appcompat.widget.AppCompatButton

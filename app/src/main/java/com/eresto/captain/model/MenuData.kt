@@ -28,7 +28,7 @@ data class Item(
     val in_room_price:Int,
     var item_name: String,
     val item_name_alias: String?,
-    var item_price: Int,
+    var item_price: Double,
     val short_desc: String?,
     val item_short_name: String?,
     val session_id: String?,

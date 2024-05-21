@@ -10,22 +10,28 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.Parcelable
-import android.view.*
-import android.widget.*
+import android.util.Log
+import android.view.Window
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import com.bumptech.glide.Glide
 import com.eresto.captain.R
-import com.eresto.captain.model.*
+import com.eresto.captain.model.DataInvoice
+import com.eresto.captain.model.InvoiceKot
+import com.eresto.captain.model.ItemQSR
+import com.eresto.captain.model.KotInstance
+import com.eresto.captain.model.Orders
+import com.eresto.captain.model.PrinterRespo
+import com.eresto.captain.model.RestoOrderKot
+import com.eresto.captain.model.TakeawayOrder
 import com.eresto.captain.views.printer.AsyncBluetoothEscPosPrint
 import com.eresto.captain.views.printer.AsyncEscPosPrint
 import com.eresto.captain.views.printer.AsyncEscPosPrinter
@@ -34,18 +40,12 @@ import com.eresto.captain.views.printer.AsyncUsbEscPosPrint
 import com.eresto.captain.views.printer.connection.tcp.TcpConnection
 import com.eresto.captain.views.printer.connection.usb.UsbConnection
 import com.eresto.captain.views.printer.connection.usb.UsbPrintersConnections
-import com.eresto.captain.views.printer.textparser.PrinterTextParserImg
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
-import java.io.FileInputStream
-import java.text.DecimalFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Objects
 import kotlin.math.roundToInt
 
 
@@ -339,13 +339,13 @@ class PrintMaster {
                             }
                         }
 
-                       /* 1 -> {
-                            if (kot != null) { //                                printKOTFunction(activity, kot, table, type, print.ip, print.port, onSuccess)
-                            } else if (kotTake != null) { //                                printKOTFunction(activity, kotTake, table, type, print.ip, print.port, onSuccess)
-                            } else if (data != null) {
-                                A5Printer.a5Print(activity, data, print, onSuccess)
-                            }
-                        }*/
+                        /* 1 -> {
+                             if (kot != null) { //                                printKOTFunction(activity, kot, table, type, print.ip, print.port, onSuccess)
+                             } else if (kotTake != null) { //                                printKOTFunction(activity, kotTake, table, type, print.ip, print.port, onSuccess)
+                             } else if (data != null) {
+                                 A5Printer.a5Print(activity, data, print, onSuccess)
+                             }
+                         }*/
                     }
                 }
 
@@ -747,7 +747,7 @@ class PrintMaster {
                         "XXX"
                     }
                 }</b>" + getEndPoint(qty) + "\n"
-                if (remain.isNotEmpty()) print += "$name    ${remain.trim()+ getEndPoint(name)}\n"
+                if (remain.isNotEmpty()) print += "$name    ${remain.trim() + getEndPoint(name)}\n"
                 if (kot.item[it].sp_inst != null && kot.item[it].sp_inst != "null") {
                     try {
                         if (!kot.item[it].sp_inst.isNullOrEmpty()) {
@@ -781,6 +781,7 @@ class PrintMaster {
                 if (kot.item[it].kot_ncv != 0) {
                     var ss = ""
                     ss += when (kot.item[it].kot_ncv) {
+                        1 -> " (No Charge)\n"
                         2 -> " (Complementary)\n"
                         3 -> " (Void)\n"
                         else -> ""
@@ -898,11 +899,11 @@ class PrintMaster {
                         "XXX"
                     }
                 }</b>" + getEndPoint(qty) + "\n"
-                val itemSp=kot.resto_order_kot[it]
+                val itemSp = kot.resto_order_kot[it]
                 var spDash = "-";
                 if (itemSp.is_edited != 0) {
                     when (itemSp.is_edited) {
-                        2,3,9 -> { //sp
+                        2, 3, 9 -> { //sp
                             spDash = "--- "
                         }
                     }
@@ -942,6 +943,7 @@ class PrintMaster {
                 if (kot.resto_order_kot[it].kot_ncv != 0) {
                     var ss = ""
                     ss += when (kot.resto_order_kot[it].kot_ncv) {
+                        1 -> " (No Charge)\n"
                         2 -> " (Complementary)\n"
                         3 -> " (Void)\n"
                         else -> ""
@@ -1235,7 +1237,7 @@ class PrintMaster {
         }
 
         fun getPrintStrInvoice(activity: Activity, order: DataInvoice?): String {
-         return ""
+            return ""
         }
 
         fun getFontStrikeText(item: ItemQSR, tag: String, align: String): String {
@@ -1273,7 +1275,7 @@ class PrintMaster {
                     9 -> { //new item
                         when (tag) {
                             "name" -> {
-                                fontTag = "$align<font color='bg-black' size='wide'>"
+                                fontTag = "$align<font size='wide'>++"
                             }
 
                             "qty" -> {
@@ -1307,7 +1309,7 @@ class PrintMaster {
                     1 -> { //qty
                         when (tag) {
                             "qty" -> {
-                                fontTag = "$align<u>"
+                                fontTag = "$align<font color='bg-black' size='wide'>"
                             }
                         }
                     }
@@ -1323,7 +1325,7 @@ class PrintMaster {
                     3 -> { //both
                         when (tag) {
                             "qty" -> {
-                                fontTag = "$align<u>"
+                                fontTag = "$align<font color='bg-black' size='wide'>"
                             }
 
                             "sp" -> {
@@ -1335,11 +1337,11 @@ class PrintMaster {
                     9 -> { //new item
                         when (tag) {
                             "name" -> {
-                                fontTag = "$align<font color='bg-black' size='wide'>"
+                                fontTag = "$align<font size='wide'>++"
                             }
 
                             "qty" -> {
-                                fontTag = "$align<u>"
+                                fontTag = "$align<font color='bg-black' size='wide'>"
                             }
 
                             "sp" -> {
@@ -1353,8 +1355,8 @@ class PrintMaster {
                 when (tag) {
                     "qty" -> {
                         if (!fontTag.contains(align)) fontTag += align
-                        if (!fontTag.contains("<u")) {
-                            fontTag += "<u>"
+                        if (!fontTag.contains("<font")) {
+                            fontTag += "</font>"
                         }
                     }
                 }
@@ -1377,6 +1379,7 @@ class PrintMaster {
 //            }
             return endPoint
         }
+
         fun printAllKOTFunction(
             activity: Activity,
             order: Orders,
@@ -1661,124 +1664,10 @@ class PrintMaster {
                 2 -> getPrintKOTStringType2(activity, kot, "", table, person)
                 else -> getPrintKOTString(activity, kot, "", table, person)
             }
+            Log.e("daljdajdjsljs", "PRINT STRING 1650 printKOTFunction : $print")
             printer = AsyncEscPosPrinter(TcpConnection(ip, port.toInt()), 203, 80f, 47)
-
-            /*    val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            val formatDisplay = SimpleDateFormat("dd-MMM/HH:mm")
-            var date: Date? = null
-            try {
-                date = format.parse(kot.kot_order_date)
-                str = formatDisplay.format(date)
-            } catch (e: ParseException) {
-                e.printStackTrace()
-            }
-
-            var top =
-                "${kot.kot_instance_id.split("_")[0]}/${kot.kot_instance_id.split("_")[2]}/${kot.short_name}"
-            val max = 20
-            val different = if (top.length > max) 0 else max - top.length
-            var isEdited = false
-            var isDeletedKOT = true
-
-            for (it in kot.item) {
-                if (it.soft_delete == 0) isDeletedKOT = false
-                if (kot.soft_delete != 0) {
-                    it.soft_delete = 2
-                } else if (it.is_edited != 0) {
-                    isEdited = true
-                }
-            }
-            if (isDeletedKOT) {
-                kot.soft_delete = 2
-                isEdited = false
-            }
-            if (kot.kot_instance_id.split("_")[2].toInt() > 1) {
-                top += "..."
-            }
-            var print =
-                if (kot.soft_delete != 0) "[C]<font size='wide'>Deleted By - ${
-                    pref!!.getStr(
-                        activity,
-                        KeyUtils.shortName
-                    )
-                }</font>\n" else ""
-            print += if (isEdited) "[C]<font color='bg-black' size='wide'> </font>   <font color='bg-black' size='wide'> </font>   <font color='bg-black' size='wide'> </font>\n" else ""
-            print += "[C]<b><font size='wide'>------------------------</font></b>\n" + "[C]<font size='wide'><b>$top</font></b>\n\n" + "[L]${
-                str!!.split(
-                    "/"
-                )[0]
-            } <b>${str.split("/")[1]}</b>[C]<b>$table</b>[R]Pax:$person\n" + "[C]<b><font size='wide'>------------------------</font></b>\n" + "[L]Item[R]Qty\n" + "[C]<b><font size='wide'>------------------------</font></b>\n"
-            var total = 0
-            for (it in kot.item.indices) {
-                if (kot.item[it].soft_delete != 0) kot.item[it].is_edited = 0
-                val name = getFontStrikeText(kot.item[it], "name", "[L]")
-                val qty = getFontStrikeText(kot.item[it], "qty", "[R]")
-                val sp = getFontStrikeText(kot.item[it], "sp", "[L]")
-                var remain = ""
-                val itemName = if (kot.item[it].item_name.length > 40) {
-                    remain = kot.item[it].item_name.substring(40, kot.item[it].item_name.length)
-                    kot.item[it].item_name.substring(0, 40)
-                } else {
-                    kot.item[it].item_name
-                }
-                print += name + "${it + 1}. $itemName" + getEndPoint(name) + qty + "<b>${
-                    if (kot.item[it].soft_delete == 0) {
-                        kot.item[it].qty
-                    } else {
-                        "XXX"
-                    }
-                }</b>" + getEndPoint(qty) + "\n"
-                if (remain.isNotEmpty()) print += "[L]   ${remain.trim()}\n"
-                if (kot.item[it].sp_inst != null && kot.item[it].sp_inst != "null") {
-                    try {
-                        if (!kot.item[it].sp_inst.isNullOrEmpty()) {
-                            val items = JSONArray(kot.item[it].sp_inst)
-                            for (i in 0 until items.length()) {
-                                print += "[L]    $sp<b>-${
-                                    items.getString(i).trim().replace("\\/", "/")
-                                }</b>" + getEndPoint(sp) + "\n"
-                            }
-                            print += "\n"
-                        } else {
-                            if (kot.item[it].sp_inst != "null") {
-                                if (kot.item[it].sp_inst != null && kot.item[it].sp_inst!!.isNotEmpty()) {
-                                    print += "[L]    $sp<b>-${kot.item[it].sp_inst}</b>" + getEndPoint(
-                                        sp
-                                    ) + "\n"
-                                }
-                            }
-                        }
-
-                    } catch (e: JSONException) {
-                        if (!kot.item[it].sp_inst.isNullOrEmpty()) {
-                            val text = kot.item[it].sp_inst!!.split(",")
-                            for (te in text) {
-                                print += "[L]    $sp<b>-${te.trim()}</b>" + getEndPoint(sp) + "\n"
-                            }
-                        }
-                        e.printStackTrace()
-                    }
-                }
-                if (kot.item[it].kot_ncv != 0) {
-                    var ss = ""
-                    ss += when (kot.item[it].kot_ncv) {
-                        2 -> " (Complementary)\n"
-                        3 -> " (Void)\n"
-                        else -> ""
-                    }
-
-                    if (ss.isNotEmpty()) {
-                        print += "[L]"
-                        for (i in 0 until (it + 1).toString().length + 1) print += " "
-                        print += "$ss"
-                    }
-                }
-                total += kot.item[it].qty
-            }
-            print += "[L]\n[C]<b><font size='wide'>------------------------</font></b>"
-            print += "\n[C]" + "\n[C]"*/
             val copies = pref!!.getInt(activity, "kot_copies")
-
+            Log.e("jlfsjfs", "Print String :: $print")
             AsyncTcpEscPosPrint(activity, onSuccess, type, if (copies == 0) 1 else copies).execute(
                 getAsyncEscPosPrinter(print)
             )
@@ -1865,7 +1754,7 @@ class PrintMaster {
                             "XXX"
                         }
                     }</b>" + getEndPoint(qty) + "\n"
-                    if (remain.isNotEmpty()) print += "$name    ${remain.trim()+ getEndPoint(name)}\n"
+                    if (remain.isNotEmpty()) print += "$name    ${remain.trim() + getEndPoint(name)}\n"
                     val itemSp = kot.item[it]
                     var spDash = "-";
                     if (itemSp.is_edited != 0) {
@@ -2011,6 +1900,9 @@ class PrintMaster {
                             "",
                             ""
                         )
+                    if (item.soft_delete == 1) {
+                        break
+                    }
                     val name = getFontStrikeText(item, "name", "[L]")
                     val qty = getFontStrikeText(item, "qty", "[R]")
                     // val sp = getFontStrikeText(item, "sp", "[L]")
@@ -2166,6 +2058,9 @@ class PrintMaster {
                             "",
                             ""
                         )
+                    if (item.soft_delete == 1) {
+                        break
+                    }
                     var space = ""
                     for (i in 0 until 7 - (kot.resto_order_kot[it].qty).toString().length) space += " "
 
@@ -2189,7 +2084,7 @@ class PrintMaster {
                             "XXX"
                         }
                     }</b>" + getEndPoint(qty) + space + name + itemName + getEndPoint(name) + "\n"
-                    if (remain.isNotEmpty()) print += "$name    ${remain.trim()+ getEndPoint(name)}\n"
+                    if (remain.isNotEmpty()) print += "$name    ${remain.trim() + getEndPoint(name)}\n"
                     val itemSp = kot.resto_order_kot[it]
                     var spDash = "- "
                     if (itemSp.is_edited != 0) {
@@ -2242,7 +2137,7 @@ class PrintMaster {
                         if (ss.isNotEmpty()) {
                             print += "[L]"
                             for (i in 0 until (it + 1).toString().length + 1) print += " "
-                            print += "$ss"
+                            print += "$space $ss"
                         }
                     }
                     total += kot.resto_order_kot[it].qty
@@ -2327,6 +2222,9 @@ class PrintMaster {
                         "",
                         ""
                     )
+                if (item.soft_delete == 1) {
+                    break
+                }
                 val name = getFontStrikeText(item, "name", "[L]")
                 val qty = getFontStrikeText(item, "qty", "[R]")
                 //val sp = getFontStrikeText(item, "sp", "[L]")
@@ -2380,6 +2278,7 @@ class PrintMaster {
                 if (kot.resto_order_kot[it].kot_ncv != 0) {
                     var ss = ""
                     ss += when (kot.resto_order_kot[it].kot_ncv) {
+                        1 -> " (No Charge)\n"
                         2 -> " (Complementary)\n"
                         3 -> " (Void)\n"
                         else -> ""
@@ -2475,7 +2374,11 @@ class PrintMaster {
                         "",
                         ""
                     )
+                if (item.soft_delete == 1) {
+                    break
+                }
                 var space = ""
+
                 for (i in 0 until 7 - (kot.resto_order_kot[it].qty).toString().length) space += " "
 
                 val name = getFontStrikeTextType2(
@@ -2543,6 +2446,7 @@ class PrintMaster {
                 if (kot.resto_order_kot[it].kot_ncv != 0) {
                     var ss = ""
                     ss += when (kot.resto_order_kot[it].kot_ncv) {
+                        1 -> " (No Charge)\n"
                         2 -> " (Complementary)\n"
                         3 -> " (Void)\n"
                         else -> ""
@@ -2551,7 +2455,7 @@ class PrintMaster {
                     if (ss.isNotEmpty()) {
                         print += "[L]"
                         for (i in 0 until (it + 1).toString().length + 1) print += " "
-                        print += "$ss"
+                        print += "$space $ss"
                     }
                 }
                 total += kot.resto_order_kot[it].qty
@@ -2616,8 +2520,9 @@ class PrintMaster {
             } <b>${str.split("/")[1]}</b>[C]<b>$table</b>[R]Pax:$person\n" + "[C]<b><font size='wide'>------------------------</font></b>\n" + "[L]Item[R]Qty\n" + "[C]<b><font size='wide'>------------------------</font></b>\n"
             var total = 0
             for (it in kot.item.indices) {
-
-
+                if (kot.item[it].soft_delete == 1) {
+                    break
+                }
                 if (kot.item[it].soft_delete != 0) kot.item[it].is_edited = 0
                 val name = getFontStrikeText(
                     kot.item[it],
@@ -2640,17 +2545,17 @@ class PrintMaster {
                     if (kot.item[it].soft_delete == 0) {
                         kot.item[it].qty
                     } else {
-                        "XXX"
+                        "XX"
                     }
                 }</b>" + getEndPoint(qty) + "\n"
-                if (remain.isNotEmpty()) print += "$name${remain.trim()+ getEndPoint(name)}\n"
+                if (remain.isNotEmpty()) print += "$name${remain.trim() + getEndPoint(name)}\n"
 
                 val itemSp = kot.item[it]
                 var spDash = "-";
                 if (itemSp.is_edited != 0) {
                     when (itemSp.is_edited) {
                         2, 3, 9 -> { //sp
-                            spDash = "--- "
+                            spDash = "-- "
                         }
                     }
                 }
@@ -2689,6 +2594,7 @@ class PrintMaster {
                 if (kot.item[it].kot_ncv != 0) {
                     var ss = ""
                     ss += when (kot.item[it].kot_ncv) {
+                        1 -> " (No Charge)\n"
                         2 -> " (Complementary)\n"
                         3 -> " (Void)\n"
                         else -> ""
@@ -2717,12 +2623,17 @@ class PrintMaster {
             var print = ""
             var str: String? = null
             val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val format2 = SimpleDateFormat("yyyy-MM-dd")
             val formatDisplay = SimpleDateFormat("dd-MMM/HH:mm")
             var date: Date? = null
             try {
                 date = format.parse(kot.kot_order_date)
+                Log.e("jlfsjfs", "kot_order_date :: $date :: ${kot.kot_order_date}")
                 str = formatDisplay.format(date)
             } catch (e: ParseException) {
+                date = format2.parse(kot.kot_order_date)
+                Log.e("jlfsjfs", "kot_order_date catch :: $date :: ${kot.kot_order_date}")
+                str = formatDisplay.format(date)
                 e.printStackTrace()
             }
 
@@ -2763,8 +2674,9 @@ class PrintMaster {
             } <b>${str.split("/")[1]}</b>[C]<b>$table</b>[R]Pax:$person\n" + "[C]<b><font size='wide'>------------------------</font></b>\n" + "[L]Qty   Item\n" + "[C]<b><font size='wide'>------------------------</font></b>\n"
             var total = 0
             for (it in kot.item.indices) {
-
-
+                if (kot.item[it].soft_delete == 1) {
+                    break
+                }
                 if (kot.item[it].soft_delete != 0) kot.item[it].is_edited = 0
                 var space = ""
                 for (i in 0 until 7 - (kot.item[it].qty).toString().length) space += " "
@@ -2790,16 +2702,16 @@ class PrintMaster {
                     if (kot.item[it].soft_delete == 0) {
                         kot.item[it].qty
                     } else {
-                        "XXX"
+                        "XX"
                     }
                 }</b>" + getEndPoint(qty) + space + name + itemName + getEndPoint(name) + "\n"
-                if (remain.isNotEmpty()) print += "$name    ${remain.trim()+ getEndPoint(name)}\n"
+                if (remain.isNotEmpty()) print += "$name    ${remain.trim() + getEndPoint(name)}\n"
                 val itemSp = kot.item[it]
                 var spDash = "- "
                 if (itemSp.is_edited != 0) {
                     when (itemSp.is_edited) {
                         2, 3, 9 -> { //sp
-                            spDash = "--- "
+                            spDash = "-- "
                         }
                     }
                 }
@@ -2835,6 +2747,7 @@ class PrintMaster {
                 if (kot.item[it].kot_ncv != 0) {
                     var ss = ""
                     ss += when (kot.item[it].kot_ncv) {
+                        1 -> " (No Charge)\n"
                         2 -> " (Complementary)\n"
                         3 -> " (Void)\n"
                         else -> ""
@@ -2843,7 +2756,7 @@ class PrintMaster {
                     if (ss.isNotEmpty()) {
                         print += "[L]"
                         for (i in 0 until (it + 1).toString().length + 1) print += " "
-                        print += "$ss"
+                        print += "$space $ss"
                     }
                 }
                 total += kot.item[it].qty
@@ -2895,6 +2808,7 @@ class PrintMaster {
                 2 -> getPrintKOTStringType2(activity, kot, kitchenCatName, table, person)
                 else -> getPrintKOTString(activity, kot, kitchenCatName, table, person)
             }
+            Log.e("daljdajdjsljs", "PRINT STRING 2773 printKOTFunction : $print")
             printer = AsyncEscPosPrinter(TcpConnection(ip, port.toInt()), 203, 80f, 47)
             val copies = pref!!.getInt(activity, "kot_copies")
 
@@ -2919,6 +2833,7 @@ class PrintMaster {
                 2 -> getPrintKOTStringType2(activity, kot, "", table, person)
                 else -> getPrintKOTString(activity, kot, "", table, person)
             }
+            Log.e("daljdajdjsljs", "PRINT STRING 2800 printKOTFunction : $print")
             printer = AsyncEscPosPrinter(TcpConnection(ip, port.toInt()), 203, 80f, 47)
             val copies = pref!!.getInt(activity, "kot_copies")
             AsyncTcpEscPosPrint(activity, onSuccess, 3, if (copies == 0) 1 else copies).execute(
@@ -2942,6 +2857,7 @@ class PrintMaster {
                 2 -> getPrintKOTStringType2(activity, kot, kitchenCatName, table, person)
                 else -> getPrintKOTString(activity, kot, kitchenCatName, table, person)
             }
+            Log.e("daljdajdjsljs", "PRINT STRING 2823 printKOTFunction : $print")
             printer =
                 AsyncEscPosPrinter(
                     TcpConnection(ip, port.toInt()),

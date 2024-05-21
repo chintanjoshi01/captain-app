@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "881064176730",
+    "project_id": "captain-app-ca934",
+    "storage_bucket": "captain-app-ca934.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881064176730:android:26b0063f9beab965217c63",
+        "android_client_info": {
+          "package_name": "com.eresto.captain.cj"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCohfEyFIgxTI_Rq5u54NT7pj025NKg9qI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,16 +1,30 @@
 package com.eresto.captain.ui
 
+import android.app.Dialog
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.DisplayMetrics
-import android.view.LayoutInflater
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.TextView
+import android.view.ViewGroup
+import android.view.Window
+import android.widget.AutoCompleteTextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.text.isDigitsOnly
+import androidx.core.widget.addTextChangedListener
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.eresto.captain.R
@@ -24,14 +38,22 @@ import com.eresto.captain.model.OrderDetailQSR
 import com.eresto.captain.model.TakeawayOrder
 import com.eresto.captain.utils.KeyUtils
 import com.eresto.captain.utils.SocketForegroundService
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.eresto.captain.utils.SocketForegroundService.Companion.ACTION_CUSTOMER
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.Objects
 
 class QSRKOTActivity : BaseActivity() {
 
+    private var address: String = ""
+    private var strGST: String = ""
+    private var strAdd: String = ""
+    private var strPerson: Int = 1
+    private var strName: String = ""
+    private var strContactNumber: String = ""
     private var binding: ActivityQsrBinding? = null
     private var tableId = 0
     private var orderId = 0
@@ -42,6 +64,7 @@ class QSRKOTActivity : BaseActivity() {
     private var tableName = ""
     private var rights = ""
     private var isAlert = false
+    private var invoiceId = ""
     var custName = ""
     var custNumber = ""
     var custPerson = 0
@@ -58,6 +81,57 @@ class QSRKOTActivity : BaseActivity() {
     var invoiceBluetooth: DataInvoice? = null
     var positionBluetooth: Int = 0
     val gson = Gson()
+
+    private val broadcastReceiverCustomerDetails = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_CUSTOMER) {
+                // Safely get the extras from the intent
+                val ua = intent.getStringExtra("ua") ?: "{}"
+                val pv = intent.getStringExtra("pv") ?: "{}"
+
+                Log.d("BroadcastReceiver", "Received ua: $ua")
+                Log.d("BroadcastReceiver", "Received pv: $pv")
+
+                try {
+                    // Parse the "pv" JSON
+                    val pvObject = JSONObject(pv)  // Parse the outer "pv" JSON
+
+                    // Extract the nested "pv" object first
+                    if (pvObject.has("pv")) {
+                        val nestedPvObject = pvObject.getJSONObject("pv")
+
+                        // Check if the "cd" object exists inside the nested "pv" object
+                        if (nestedPvObject.has("cd")) {
+                            val customer = nestedPvObject.getJSONObject("cd") // Extract "cd" object
+
+                            // Assign values to the variables
+                            strName = customer.optString("cn", "") // Customer Name
+                            strContactNumber =
+                                customer.optString("cm", "") // Customer Contact (as String)
+                            strPerson = customer.optInt("nop", 0) // Number of Persons
+                            strAdd = customer.optString("ca", "") // Customer Address
+                            strGST = customer.optString("cgn", "") // GST Number
+
+                            // Log the extracted customer details
+                            Log.e("CustomerDetails", "Name: $strName")
+                            Log.e("CustomerDetails", "Number: $strPerson")
+                            Log.e("CustomerDetails", "Persons: $custPerson")
+                            Log.e("CustomerDetails", "Address: $strAdd")
+                            Log.e("CustomerDetails", "GST: $strGST")
+                        } else {
+                            Log.e("CustomerDetails", "Customer data (cd) is missing in nested pv")
+                        }
+                    } else {
+                        Log.e("CustomerDetails", "Nested 'pv' object is missing")
+                    }
+                } catch (e: JSONException) {
+                    Log.e("BroadcastReceiver", "Error parsing JSON: ${e.message}", e)
+                }
+            }
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQsrBinding.inflate(layoutInflater)
@@ -67,6 +141,20 @@ class QSRKOTActivity : BaseActivity() {
         setSupportActionBar(binding!!.toolbar)
         type = intent.getIntExtra("type", 0)
         val main = intent.getStringExtra("message")!!
+        Log.e(
+            "QSRKOTActivity",
+            "onCreate: $main"
+        )
+        val jsonObjData = JSONObject(main)
+        val customer = jsonObjData.getJSONObject("cd")
+        Log.e("jlsjdlfdjl", "CD :: $customer")
+        strName = customer.getString("cn")
+        strContactNumber = customer.getString("cm")
+        strPerson = customer.getInt("nop")
+        strAdd = customer.getString("ca")
+        strGST = customer.getString("cgn")
+
+
         tableId = intent.getIntExtra("table_id", 0)
 
         binding!!.rvPendingKot.layoutManager =
@@ -79,7 +167,12 @@ class QSRKOTActivity : BaseActivity() {
                 OrderDetailQSR::class.java
             )
         )
+        val filter = IntentFilter(ACTION_CUSTOMER)
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(broadcastReceiverCustomerDetails, filter)
+
         binding!!.swipeContainer.setOnRefreshListener {
+            Log.e("jjladljja", "setOnRefreshListener ")
             getTableDetails()
         }
         binding!!.llMenu.setOnClickListener {
@@ -91,16 +184,18 @@ class QSRKOTActivity : BaseActivity() {
             intent.putExtra("type", type)
             intent.putExtra("table_id", tableId)
             intent.putExtra("section_id", 0)
-            intent.putExtra("name", custName)
-            intent.putExtra("number", custNumber)
-            intent.putExtra("person", custPerson)
-            intent.putExtra("address", custAddress)
+            intent.putExtra("name", strName)
+            intent.putExtra("number", strContactNumber)
+            intent.putExtra("person", strPerson)
+            intent.putExtra("address", strAdd)
             intent.putExtra("discount", custDiscount)
             intent.putExtra("gst", custGST)
             intent.putExtra("cust_cat_id", custCatId)
             intent.putExtra("is_free_table", false)
             ViewKOTsActivityResult.launch(intent)
         }
+
+
     }
 
     private val ViewKOTsActivityResult =
@@ -114,14 +209,14 @@ class QSRKOTActivity : BaseActivity() {
                 } else {
                     getTableDetails()
                 }
-            }else {
+            } else {
                 getTableDetails()
             }
         }
 
-    private fun getTableDetails() {
+    private fun getCustomerDetails() {
         val jsonObj = JSONObject()
-        jsonObj.put("ca", GET_TABLE_ORDER)
+        jsonObj.put("ca", CUSTOMER_DETAILS)
         val cv = JSONObject()
         cv.put("tab_id", tableId)
         cv.put("sid", pref!!.getInt(this@QSRKOTActivity, "sid"))
@@ -130,8 +225,49 @@ class QSRKOTActivity : BaseActivity() {
         setCallBack(object : OnResponseFromServerPOS {
             override fun onResponse(json: String) {
                 try {
+                    val jsonObjData = JSONObject(json)
+                    Log.e("jjladljja", "json $json")
+                    val customer = jsonObjData.getJSONObject("pv")
+                    custName = customer.getString("cn")
+                    custNumber = customer.getString("cm")
+                    custPerson = customer.getInt("nop")
+                    custAddress = customer.getString("ca")
+                    custGST = customer.getString("cgn")
+                    Log.e("jjladljja", "Name $custName")
+                    Log.e("jjladljja", "custNumber $custNumber")
+                    Log.e("jjladljja", "custPerson $custPerson")
+                    Log.e("jjladljja", "custAddress $custAddress")
+                    Log.e("jjladljja", "custDiscount $custDiscount")
+                    Log.e("jjladljja", "custGST $custGST")
+                    Log.e("jjladljja", "custCatId $custCatId")
+                } catch (e: JSONException) {
+                    Log.e("jjladljja", "custCatId $e")
+                    e.printStackTrace()
+                }
+            }
+        })
+    }
+
+    private fun getTableDetails() {
+        val jsonObj = JSONObject()
+        jsonObj.put("ca", GET_TABLE_ORDER)
+        val cv = JSONObject()
+        cv.put("tab_id", tableId)
+        cv.put("sid", pref!!.getInt(this@QSRKOTActivity, "sid"))
+        jsonObj.put("cv", cv)
+        sendMessageToServer(jsonObj, SocketForegroundService.ACTION_ORDER)
+        setCallBack(object : OnResponseFromServerPOS {
+            override fun onResponse(json: String) {
+                try {
+                    Log.e("jjladljja", "json GET Table $json")
                     binding!!.swipeContainer.isRefreshing = false
                     val jsonObjData = JSONObject(json)
+                    val customer = jsonObjData.getJSONObject("cd")
+                    custName = customer.getString("cn")
+                    custNumber = customer.getString("cm")
+                    custPerson = customer.getInt("nop")
+                    custAddress = customer.getString("ca")
+                    custGST = customer.getString("cgn")
                     if (jsonObjData.getJSONObject("order_details")
                             .getJSONObject("order")
                             .getInt("tab_status") != 1
@@ -147,6 +283,7 @@ class QSRKOTActivity : BaseActivity() {
                         finish()
                     }
                 } catch (e: JSONException) {
+                    Log.e("jjladljja", "JSONException ${e.printStackTrace()}")
                     finish()
                     e.printStackTrace()
                 }
@@ -158,6 +295,7 @@ class QSRKOTActivity : BaseActivity() {
         binding!!.swipeContainer.isRefreshing = false
         if (response != null) {
             val userRole = pref!!.getInt(this@QSRKOTActivity, KeyUtils.roleId)
+//            invoiceId = response.order.inv_id
             if (userRole == 2) {
                 binding!!.btnCloseOrder.visibility = View.VISIBLE
                 binding!!.btnCreateInvoice.visibility = View.VISIBLE
@@ -216,6 +354,17 @@ class QSRKOTActivity : BaseActivity() {
             val jsonObj = JSONObject()
             val cv = JSONObject()
             jsonObj.put("ca", CLOSE_ORDER)
+            val cd = JSONObject()
+            cd.put("cn", strName)
+            cd.put("cm", strContactNumber)
+            cd.put("cgn", strGST)
+            cd.put("ca", address)
+            cd.put("nop", strPerson)
+            Log.e(
+                "dhdshfkh",
+                "CD Data :: ${cd.toString()}"
+            )
+            cv.put("cd", cd)
             cv.put("sid", pref!!.getInt(this, "sid"))
             cv.put("tab_id", tableId)
             jsonObj.put("cv", cv)
@@ -326,28 +475,6 @@ class QSRKOTActivity : BaseActivity() {
 
                     override fun onKOTDelete(position: Int, instanceId: String) {
 
-//                        val dialog = Dialog(activity!!, R.style.DialogTheme)
-//                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-//                        dialog.setCancelable(false)
-//                        dialog.setContentView(R.layout.dialog_common_filee)
-//                        dialog.show()
-//
-//                        val title = dialog.findViewById(R.id.text_title) as AppCompatTextView
-//                        title.text = resources.getString(R.string.msg_delete_kot)
-//
-//                        val no = dialog.findViewById(R.id.tv_no) as AppCompatTextView
-//                        no.setOnClickListener {
-//                            dialog.dismiss()
-//                        }
-//                        val yes = dialog.findViewById(R.id.tv_yes) as AppCompatTextView
-//                        yes.setOnClickListener {
-//                            dialog.dismiss()
-//                            deletePendingKOT(
-//                                instanceId,
-//                                position,
-//                                menuListSec[0].order.kot_instance!![position]
-//                            )
-//                        }
 
                     }
 
@@ -356,24 +483,6 @@ class QSRKOTActivity : BaseActivity() {
                         orderKotId: Int,
                         kot: KotInstance?
                     ) {
-//                        val dialog = Dialog(activity!!, R.style.DialogTheme)
-//                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-//                        dialog.setCancelable(false)
-//                        dialog.setContentView(R.layout.dialog_common_filee)
-//                        dialog.show()
-//
-//                        val title = dialog.findViewById(R.id.text_title) as AppCompatTextView
-//                        title.text = resources.getString(R.string.msg_delete_item)
-//
-//                        val no = dialog.findViewById(R.id.tv_no) as AppCompatTextView
-//                        no.setOnClickListener {
-//                            dialog.dismiss()
-//                        }
-//                        val yes = dialog.findViewById(R.id.tv_yes) as AppCompatTextView
-//                        yes.setOnClickListener {
-//                            dialog.dismiss()
-//                            deletePendingItem(orderKotId, position, kot!!)
-//                        }
                     }
                 })
 
@@ -397,7 +506,7 @@ class QSRKOTActivity : BaseActivity() {
             null,
             null,
             tableName,
-            custPerson,
+            strPerson = strPerson,
             custAddress,
             type,
             object :
@@ -440,7 +549,7 @@ class QSRKOTActivity : BaseActivity() {
         menu!!.clear()
         menuInflater.inflate(R.menu.top_main_menu, menu)
         ncv = menu.findItem(R.id.ncv)
-        ncv!!.isVisible = true
+        ncv!!.isVisible = false
         ncv!!.setIcon(
             when (orderNcv) {
                 1 -> R.drawable.ic_no_charge
@@ -462,89 +571,23 @@ class QSRKOTActivity : BaseActivity() {
 //                viewNCV(orderNcv)
 //                true
 //            }
+            R.id.pre_order -> {
+                customerDialog(false)
+//                getCustomerDetails()
+                val handler = Handler(Looper.getMainLooper())
+// Post a task with a delay of 1 second (1000 milliseconds)
+                handler.postDelayed({
+
+                    Log.d("HandlerExample", "Task executed after 1 second")
+                }, 1000)
+
+                true
+            }
 
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    fun viewNCV(ncv: Int) {
-        val bottomSheetDialog =
-            BottomSheetDialog(this@QSRKOTActivity, R.style.BottomSheetPostDialogTheme)
-        val bottomSheet: View = LayoutInflater.from(this@QSRKOTActivity)
-            .inflate(
-                R.layout.bottomsheet_view_ncv,
-                bottomSheetDialog.findViewById(R.id.bottomSheet)
-            )
-        bottomSheetDialog.setContentView(bottomSheet)
-        bottomSheetDialog.show()
-        val metrics = DisplayMetrics()
-        windowManager?.defaultDisplay?.getMetrics(metrics)
-        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        bottomSheetDialog.behavior.peekHeight = metrics.heightPixels
-
-        val regular = bottomSheetDialog.findViewById<TextView>(R.id.txt_regular)!!
-        val noCharge = bottomSheetDialog.findViewById<TextView>(R.id.txt_no_charge)!!
-        val complimentary = bottomSheetDialog.findViewById<TextView>(R.id.txt_complimentary)!!
-        val void = bottomSheetDialog.findViewById<TextView>(R.id.txt_void)!!
-        val pad = resources.getDimension(com.intuit.sdp.R.dimen._12sdp).toInt()
-        when (ncv) {
-            0 -> {
-                regular.setBackgroundResource(R.drawable.shape_red_border_round)
-                regular.setPadding(pad, pad, pad, pad)
-            }
-
-            1 -> {
-                noCharge.setBackgroundResource(R.drawable.shape_red_border_round)
-                noCharge.setPadding(pad, pad, pad, pad)
-            }
-
-            2 -> {
-                complimentary.setBackgroundResource(R.drawable.shape_red_border_round)
-                complimentary.setPadding(pad, pad, pad, pad)
-            }
-
-            3 -> {
-                void.setBackgroundResource(R.drawable.shape_red_border_round)
-                void.setPadding(pad, pad, pad, pad)
-            }
-        }
-        regular.setOnClickListener {
-            regular.setBackgroundResource(R.drawable.shape_red_border_round)
-            noCharge.setBackgroundResource(R.drawable.shape_grey_border_white)
-            complimentary.setBackgroundResource(R.drawable.shape_grey_border_white)
-            void.setBackgroundResource(R.drawable.shape_grey_border_white)
-            regular.setPadding(pad, pad, pad, pad)
-            setNCV(0)
-            bottomSheetDialog.cancel()
-        }
-        noCharge.setOnClickListener {
-            regular.setBackgroundResource(R.drawable.shape_grey_border_white)
-            noCharge.setBackgroundResource(R.drawable.shape_red_border_round)
-            complimentary.setBackgroundResource(R.drawable.shape_grey_border_white)
-            void.setBackgroundResource(R.drawable.shape_grey_border_white)
-            noCharge.setPadding(pad, pad, pad, pad)
-            setNCV(1)
-            bottomSheetDialog.cancel()
-        }
-        complimentary.setOnClickListener {
-            regular.setBackgroundResource(R.drawable.shape_grey_border_white)
-            noCharge.setBackgroundResource(R.drawable.shape_grey_border_white)
-            complimentary.setBackgroundResource(R.drawable.shape_red_border_round)
-            void.setBackgroundResource(R.drawable.shape_grey_border_white)
-            complimentary.setPadding(pad, pad, pad, pad)
-            setNCV(2)
-            bottomSheetDialog.cancel()
-        }
-        void.setOnClickListener {
-            regular.setBackgroundResource(R.drawable.shape_grey_border_white)
-            noCharge.setBackgroundResource(R.drawable.shape_grey_border_white)
-            complimentary.setBackgroundResource(R.drawable.shape_grey_border_white)
-            void.setBackgroundResource(R.drawable.shape_red_border_round)
-            void.setPadding(pad, pad, pad, pad)
-            setNCV(3)
-            bottomSheetDialog.cancel()
-        }
-    }
 
     fun setNCV(value: Int) {
         orderNcv = value
@@ -574,5 +617,68 @@ class QSRKOTActivity : BaseActivity() {
 //            lifecycleScope.launch {
 //
 //            }
+    }
+
+    private fun customerDialog(isEdit: Boolean) {
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(true)
+        dialog.setCanceledOnTouchOutside(true)
+        dialog.setContentView(R.layout.dialog_customer_details)
+        val tvContactNumber: AutoCompleteTextView =
+            dialog.findViewById(R.id.tv_contact_number) as AutoCompleteTextView
+        val tvName: TextInputEditText = dialog.findViewById(R.id.tv_name) as TextInputEditText
+        val tvPerson: TextInputEditText = dialog.findViewById(R.id.tv_ppl) as TextInputEditText
+        val tvGst: TextInputEditText = dialog.findViewById(R.id.tv_gst) as TextInputEditText
+        val tvAddress: TextInputEditText =
+            dialog.findViewById(R.id.edt_address) as TextInputEditText
+
+        tvName.setText(strName)
+        tvContactNumber.setText(strContactNumber)
+        tvPerson.setText(strPerson.toString())
+        tvAddress.setText(strAdd)
+        tvGst.setText(strGST)
+
+        val btnOk = dialog.findViewById(R.id.btn_ok) as MaterialButton
+        val cancel = dialog.findViewById(R.id.tv_cancel) as MaterialButton
+        tvPerson.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                tvPerson.text!!.clear()
+            }
+        }
+        tvContactNumber.tag = "0"
+        tvContactNumber.addTextChangedListener {
+            if (tvContactNumber.text.toString().length == 10 && tvContactNumber.text.toString()
+                    .isDigitsOnly()
+            ) {
+                if (tvContactNumber.tag.toString() == "0") {
+
+                } else {
+                    tvContactNumber.tag = "0"
+                }
+            }
+        }
+        btnOk.setOnClickListener {
+            strContactNumber =
+                if (!tvContactNumber.text.isNullOrBlank()) tvContactNumber.text.toString() else ""
+            strName =
+                if (!tvName.text.isNullOrBlank()) tvName.text.toString() else "-"
+            strPerson = if (!tvPerson.text.isNullOrBlank()) tvPerson.text.toString().toInt() else 1
+            strAdd = if (!tvAddress.text.isNullOrBlank()) tvAddress.text.toString() else ""
+            strGST = if (!tvGst.text.isNullOrBlank()) tvGst.text.toString() else ""
+            dialog.dismiss()
+        }
+
+        cancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        Objects.requireNonNull(dialog.window)
+            ?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        dialog.window!!.setGravity(Gravity.CENTER)
+        dialog.show()
     }
 }

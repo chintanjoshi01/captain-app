@@ -2,15 +2,24 @@ package com.eresto.captain.ui
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.eresto.captain.R
 import com.eresto.captain.base.BaseActivity
 import com.eresto.captain.databinding.ActivityLoginBinding
+import com.eresto.captain.ui.tables.TabActivity
 import com.eresto.captain.utils.KeyUtils
 import com.eresto.captain.utils.SocketForegroundService
 import com.eresto.captain.utils.Utils
@@ -41,6 +50,7 @@ class LoginActivity : BaseActivity() {
                 checkPermissions("req")
             }
         }
+//        binding!!.tvStep3.text = getStyledText(this , resources.getString(R.string.step_3), R.color.blackText2)
     }
 
     private fun checkPermissions(flag: String): Boolean {
@@ -93,7 +103,6 @@ class LoginActivity : BaseActivity() {
                     jsonObj.put("di", "${Build.MODEL}")//device_info
                     sendMessageToServer(jsonObj, SocketForegroundService.ACTION_LOGIN)
                 }
-
             }
         }
 
@@ -115,4 +124,42 @@ class LoginActivity : BaseActivity() {
             }
         }
     }
+
+
+    private fun getStyledText(
+        context: Context,
+        text: String,
+        colorResId: Int,
+        bracketFontSizeSp: Int =  com.intuit.ssp.R.dimen._12ssp // Font size for text inside ()
+    ): SpannableString {
+
+        if (text.contains("(") && text.contains(")")) {
+            val startIndex = text.indexOf("(")
+            val endIndex = text.indexOf(")") + 1
+            val spannable = SpannableString(text)
+
+            val color = ContextCompat.getColor(context, colorResId)
+
+            // Apply text color to the text inside ()
+            spannable.setSpan(
+                ForegroundColorSpan(color),
+                startIndex,
+                endIndex,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+
+            // Apply font size only for text inside ()
+            spannable.setSpan(
+                AbsoluteSizeSpan(bracketFontSizeSp, true), // 'true' makes it SP-based
+                startIndex,
+                endIndex,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+
+            return spannable
+        }
+
+        return SpannableString(text)
+    }
+
 }

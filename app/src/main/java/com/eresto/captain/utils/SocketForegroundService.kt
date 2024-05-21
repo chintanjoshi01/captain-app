@@ -11,17 +11,21 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.eresto.captain.R
 import com.eresto.captain.base.BaseActivity.Companion.CLOSE_ORDER
 import com.eresto.captain.base.BaseActivity.Companion.CONNECT
+import com.eresto.captain.base.BaseActivity.Companion.CUSTOMER_DETAILS
 import com.eresto.captain.base.BaseActivity.Companion.ERROR
 import com.eresto.captain.base.BaseActivity.Companion.GET_TABLE
 import com.eresto.captain.base.BaseActivity.Companion.GET_TABLE_ORDER
 import com.eresto.captain.base.BaseActivity.Companion.KOT
+import com.eresto.captain.base.BaseActivity.Companion.LOGOUT
 import com.eresto.captain.base.BaseActivity.Companion.SHOW_PROGRESS
+import com.eresto.captain.base.BaseActivity.Companion.WARRING
 import com.eresto.captain.model.GetTables
 import com.eresto.captain.model.MenuData
 import com.eresto.captain.model.PrinterRespo
@@ -44,6 +48,7 @@ class SocketForegroundService : Service() {
     private var output: PrintWriter? = null
 
     private val CHANNEL_ID = "SocketForegroundService"
+    private  var retryCont = 0
 
     private var isRunning = false
     private lateinit var executor: ExecutorService
@@ -55,7 +60,9 @@ class SocketForegroundService : Service() {
         const val ACTION_KOT = "com.eresto.captain.action.KOT"
         const val ACTION_ORDER = "com.eresto.captain.action.ORDER"
         const val ACTION_LOGIN = "com.eresto.captain.action.LOGIN"
-         var CURRENT_ACTION = ""
+        const val ACTION_LOGOUT = "com.eresto.captain.action.LOGOUT"
+        const val ACTION_CUSTOMER = "com.eresto.captain.action.CUSTOMER"
+        var CURRENT_ACTION = ""
     }
 
     interface SocketServiceCallback {
@@ -91,26 +98,36 @@ class SocketForegroundService : Service() {
         return START_STICKY
     }
 
-    fun startServer(context: Context, intent: Intent?) {
+    private fun startServer(context: Context, intent: Intent?) {
         try {
             val pref = Preferences()
             val serverIp = pref.getStr(this, "ip_address")
             val serverPort = pref.getInt(this, "port")
             mSocket = Socket(serverIp, serverPort)
+            retryCont = 0
             Log.d(TAG, "Socket Created")
             input = BufferedReader(InputStreamReader(mSocket!!.getInputStream()))
             output = PrintWriter(mSocket!!.getOutputStream(), true)
             mSocket!!.keepAlive = true
-            if(intent!!.getStringExtra("json")!=null) {
+            if (intent?.getStringExtra("json") != null) {
                 makeConnection(context, JSONObject(intent.getStringExtra("json")!!))
             }
             mSocket!!.close()
         } catch (e: IOException) {
-            // Handle connection error
+            executor.shutdown()
+            FirebaseLogger.logException(e, "SocketForegroundService")
             val mIntent = Intent(CURRENT_ACTION)
-            mIntent.putExtra("error", "POS not Available")
-            LocalBroadcastManager.getInstance(this).sendBroadcast(mIntent)
-            e.printStackTrace()
+            if (retryCont < 3) {
+                retryCont++
+                mIntent.putExtra("error", "${e.message}")
+                mIntent.putExtra("is_try_again", true)
+                mIntent.putExtra("retryCont", retryCont)
+                LocalBroadcastManager.getInstance(this).sendBroadcast(mIntent)
+            } else {
+                mIntent.putExtra("error", "POS not Available")
+                LocalBroadcastManager.getInstance(this).sendBroadcast(mIntent)
+                e.printStackTrace()
+            }
         }
     }
 
@@ -131,11 +148,18 @@ class SocketForegroundService : Service() {
             if (!response.isNullOrEmpty()) {
                 val pref = Preferences()
                 val db = DBHelper(this)
+                Log.e("jflsjfs", "Responce ::: $response")
                 val main = JSONObject(response)
                 val gson = Gson()
                 var sendMessage = main.getInt("pa")
-                if (main.has("pa") && main.getInt("pa") == ERROR) {
-                    sendMessage = ERROR
+                if (main.has("pa")) {
+                    val paValue = main.optString("pa")  // Get "pa" as a string
+                    Log.e("SocketService", "Received pa value: $paValue")  // Debugging
+                    sendMessage = when (paValue.toIntOrNull()) {
+                        ERROR -> ERROR
+                        WARRING -> WARRING
+                        else -> paValue.toIntOrNull() ?: ERROR  // Default to ERROR if conversion fails
+                    }
                 }
                 when (sendMessage) {
                     CONNECT -> {
@@ -184,6 +208,13 @@ class SocketForegroundService : Service() {
                         pref.setInt(
                             this,
                             pv.getJSONObject("print")
+                                .getInt("kdt"),
+                            "" +
+                                    "kot_design_type"
+                        )
+                        pref.setInt(
+                            this,
+                            pv.getJSONObject("print")
                                 .getInt("kdp"),
                             "kot_default_printer"
                         )
@@ -227,13 +258,6 @@ class SocketForegroundService : Service() {
                             }
                             db.InsertPrinter(list)
                         }
-//                        if (pv.getJSONArray("resto_printers").length() > 0) {
-//                            val list = gson.fromJson(
-//                                pv.getJSONArray("resto_printers").toString(),
-//                                Array<PrinterRespo>::class.java
-//                            )
-//                            db.InsertPrinter(list.asList())
-//                        }
                         if (pv.getJSONArray("tables").length() > 0) {
                             val list = ArrayList<GetTables>()
                             val tables = pv.getJSONArray("tables")
@@ -251,20 +275,6 @@ class SocketForegroundService : Service() {
                             }
                             db.InsertTable(list)
                         }
-//                        if (pv.getJSONArray("tables").length() > 0) {
-//                            val list = gson.fromJson(
-//                                pv.getJSONArray("tables").toString(),
-//                                Array<GetTables>::class.java
-//                            )
-//                            db.InsertTable(list.asList())
-//                        }
-//                        if (pv.getJSONArray("price_templates").length() > 0) {
-//                            val list = gson.fromJson(
-//                                pv.getJSONArray("price_templates").toString(),
-//                                Array<PriceTemplateData>::class.java
-//                            )
-//                            db.InsertPriceTemplate(list.asList())
-//                        }
                         if (pv.getJSONArray("kit_cat").length() > 0) {
                             val list = ArrayList<kitCat>()
                             val kitCat = pv.getJSONArray("kit_cat")
@@ -280,13 +290,6 @@ class SocketForegroundService : Service() {
                             }
                             db.InsertKitCat(list)
                         }
-//                        if (pv.getJSONArray("kit_cat").length() > 0) {
-//                            val list = gson.fromJson(
-//                                pv.getJSONArray("kit_cat").toString(),
-//                                Array<kitCat>::class.java
-//                            )
-//                            db.InsertKitCat(list.asList())
-//                        }
                         if (pv.getJSONArray("menu").length() > 0) {
                             val list = gson.fromJson(
                                 pv.getJSONArray("menu").toString(),
@@ -310,6 +313,7 @@ class SocketForegroundService : Service() {
                         jsonObj.put("aa", KOT)
                         intent.putExtra("ua", jsonObj.toString())
                         intent.putExtra("pv", main.toString())
+                        Log.e("jflsfjs", "OBJECT :: $")
                         val pv = main.getJSONObject("pv").getJSONObject("tb")
                         updateTable(pv, db)
                         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
@@ -321,8 +325,10 @@ class SocketForegroundService : Service() {
                         val intent = Intent(ACTION_TAB)
                         jsonObj.put("aa", GET_TABLE)
                         intent.putExtra("ua", jsonObj.toString())
+                        Log.e("jflsfjs", "GET_TABLE :: ${pv.toString()}")
                         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
                     }
+
                     CLOSE_ORDER -> {
                         val pv = main.getJSONObject("pv")
                         updateTable(pv, db)
@@ -338,16 +344,44 @@ class SocketForegroundService : Service() {
                         intent.putExtra("ua", jsonObj.toString())
                         intent.putExtra("pv", main.getJSONObject("pv").toString())
                         val pv = main.getJSONObject("pv").getJSONObject("tb")
+                        Log.e("jflsfjs", "OBJECT 4 pv :: ${main.getJSONObject("pv").toString()}")
+                        Log.e("jflsfjs", "OBJECT 4 aa :: $GET_TABLE_ORDER")
+                        Log.e("jflsfjs", "OBJECT 4 ua :: $jsonObj.toString()")
                         updateTable(pv, db)
                         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
                     }
 
                     ERROR -> {
-
                         val intent = Intent(CURRENT_ACTION)
-                        intent.putExtra("error", main.getString("cv"))
+                        intent.putExtra("error", main.getString("pv"))
+                        intent.putExtra("is_try_again", false)
                         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
                     }
+                    WARRING -> {
+                        val intent = Intent(CURRENT_ACTION)
+                        intent.putExtra("error", main.getString("pv"))
+                        intent.putExtra("is_try_again", true)
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+                    }
+
+                    LOGOUT -> {
+                        val intent = Intent(ACTION_LOGOUT)
+                        jsonObj.put("aa", LOGOUT)
+                        intent.putExtra("ua", jsonObj.toString())
+                        intent.putExtra("pv", main.toString())
+                        val pv = main.getJSONObject("pv").getInt("status")
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+                    }
+
+                    CUSTOMER_DETAILS -> {
+                        val intent = Intent(ACTION_CUSTOMER)
+                        jsonObj.put("aa", CUSTOMER_DETAILS)
+                        intent.putExtra("ua", jsonObj.toString())
+                        intent.putExtra("pv", main.toString())
+                        Log.e("jjladljja", "MAin Service $main")
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+                    }
+
                 }
             }
         } else {
@@ -367,6 +401,9 @@ class SocketForegroundService : Service() {
         }
         if (!pv.getString("p").isNullOrEmpty()) {
             db.UpdateTable(5, pv.getString("p"))
+        }
+        if (!pv.getString("a").isNullOrEmpty()) {
+            db.UpdateTable(4, pv.getString("a"))
         }
     }
 

@@ -51,4 +51,7 @@
     <color name="color_pending">#FDF6E4</color>
     <color name="color_delete">#FFEFEE</color>
     <color name="color_menu_shape">#4C4C4C</color>
+
+    <color name="color_gray_light_fill">#E2DFE3</color>
+    <color name="color_icon_occupied">#80ab2421</color>
 </resources>

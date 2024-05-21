@@ -5,12 +5,15 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.KeyEvent
@@ -22,15 +25,18 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
+import androidx.core.text.isDigitsOnly
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -48,6 +54,7 @@ import com.eresto.captain.utils.KeyUtils
 import com.eresto.captain.utils.Preferences
 import com.eresto.captain.utils.SocketForegroundService
 import com.eresto.captain.utils.Utils
+import com.eresto.captain.utils.Utils.Companion.displayActionSnackbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
@@ -60,9 +67,15 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.reflect.Type
+import java.util.Objects
 
 class MenuViewActivity : BaseActivity() {
 
+    private var strGST: String = ""
+    private var strAdd: String = ""
+    private var strPerson: Int = 1
+    private var strName: String = ""
+    private var strContactNumber: String = ""
     private var binding: ActivityViewMenuBinding? = null
     private var type = 0
     private var tableName = "0"
@@ -88,6 +101,8 @@ class MenuViewActivity : BaseActivity() {
     var adapterParent: TableKotAdapter? = null
     var adapterSearch: TableKotChildAdapter? = null
     var oldSelection = ""
+    var custGST = ""
+    var custDiscount = ""
 
 
     var kotNcv = 0
@@ -115,6 +130,12 @@ class MenuViewActivity : BaseActivity() {
         to = intent.getStringExtra("to") ?: ""
         orderNcr = intent.getIntExtra("order_ncr", 0)
         invId = intent.getIntExtra("inv_id", 0)
+        strName = intent.getStringExtra("name").toString()
+        strContactNumber = intent.getStringExtra("number").toString()
+        strPerson = intent.getIntExtra("person", 1)
+        intent.putExtra("address", strAdd)
+        custDiscount = intent.getStringExtra("discount").toString()
+        custGST = intent.getStringExtra("gst").toString()
         binding!!.toolbar.title = tableName
         setSupportActionBar(binding!!.toolbar)
         db = DBHelper(this@MenuViewActivity)
@@ -166,6 +187,7 @@ class MenuViewActivity : BaseActivity() {
                 true
             }
             menu.show()
+            listItem?.let { it1 -> setAdapterParent(it1) }
         }
 
         binding!!.edtSearch.setOnCloseListener {
@@ -268,8 +290,16 @@ class MenuViewActivity : BaseActivity() {
         }
 
         binding!!.btnView.setOnClickListener {
-            if (!db!!.GetCartItems(tableId).isEmpty()) {
+            val isDefaultSetting = pref!!.getBool(this, "isDefaultPrinterSetting")
+            if (!isDefaultSetting) {
+                dialogDefaultPrinterSetting(this)
+                displayActionSnackbar(this, "Please set printer settings first", 2)
+                return@setOnClickListener
+            }
+            if (db!!.GetCartItems(tableId).isNotEmpty()) {
                 submitKOT()
+            } else {
+                displayActionSnackbar(this, "Please add something", 2)
             }
         }
         binding!!.btnCancel.setOnClickListener {
@@ -283,6 +313,13 @@ class MenuViewActivity : BaseActivity() {
         pageForItems = 0
         listItem = java.util.ArrayList()
         FetchLocalData().execute()
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                db!!.deleteItemOfTable(tableId)
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
+        })
     }
 
     private fun getWaiterMenuList(expandItem: String) {
@@ -354,7 +391,6 @@ class MenuViewActivity : BaseActivity() {
             }
 
             override fun onItemDelete(position: Int, item: Item, values: Int) {
-
                 db!!.deleteItemOfTable(tableId, item.id)
                 showAnim()
             }
@@ -363,10 +399,11 @@ class MenuViewActivity : BaseActivity() {
                 val data = Utils.countTaxDiscount(
                     if (item.kot_ncv == 0) {
                         item.item_price
-                    } else 0,
+                    } else 0.0,
                     item.count,
                     item.item_tax, 0f, 0, 0.0, 1
                 ).split("|")
+                val ncv = if (kotNcv == 0) item.kot_ncv else kotNcv
                 val tableItem = CartItemRow(
                     item.id,
                     0,
@@ -380,7 +417,7 @@ class MenuViewActivity : BaseActivity() {
                     tableId,
                     "-1",
                     item.count,
-                    item.kot_ncv,
+                    ncv,
                     item.local_sp_inst,
                     item.kitchen_cat_id,
                     item.item_tax,
@@ -389,13 +426,17 @@ class MenuViewActivity : BaseActivity() {
                 )
 
                 if (item.isChecked) {
-                    db!!.UpdateTableItem(tableItem)
-                    adapterParent!!.refreshList(tableId, position)
+                    db!!.UpdateTableItemQty(tableItem)
+                    setAdapterParent(list)
+                    adapterParent?.refreshList(tableId, position)
                     showAnim()
                 } else {
                     db!!.InsertTableItems(tableItem)
                     showAnim()
-                    adapterParent!!.refreshList(tableId, position)
+                    setAdapterParent(list)
+                    if (adapterParent != null) {
+                        adapterParent?.refreshList(tableId, position)
+                    }
                 }
             }
         })
@@ -421,79 +462,7 @@ class MenuViewActivity : BaseActivity() {
         }
         if (pref!!.getStr(this@MenuViewActivity, KeyUtils.sortingKey) == "item_group") {
             if (adapterParent == null || isHardChange) {
-                adapterParent = TableKotAdapter(this@MenuViewActivity, list, object :
-                    TableKotAdapter.SetOnItemClick {
-                    override fun onItemScroll(position: Int) {
-                        binding!!.recyclerview.scrollToPosition(position)
-                    }
-
-                    override fun onItemClicked(position: Int, item: Item, parent: MenuData) {
-                        addItemDialog(
-                            position,
-                            item.isChecked,
-                            item,
-                            item.item_cat_id
-                        )
-                    }
-
-                    override fun onItemDelete(
-                        position: Int,
-                        item: Item,
-                        parent: MenuData,
-                        values: Int
-                    ) {
-                        db!!.deleteItemOfTable(tableId, item.id)
-//                        val mPosition = if (db!!.isItemFromFSI(item.id)) -1 else position
-//                        adapterParent!!.refreshList(tableId, mPosition)
-                        showAnim()
-                    }
-
-                    override fun onItemUpdate(
-                        position: Int,
-                        item: Item,
-                        parent: MenuData,
-                        values: Int
-                    ) {
-                        val data = Utils.countTaxDiscount(
-                            if (item.kot_ncv == 0) {
-                                item.item_price
-                            } else 0,
-                            item.count,
-                            item.item_tax, 0f, 0, 0.0, 1
-                        ).split("|")
-                        val tableItem = CartItemRow(
-                            item.id,
-                            0,
-                            item.item_name,
-                            item.item_short_name
-                                ?: "",
-                            item.item_price,
-                            item.sp_inst
-                                ?: "",
-                            item.item_cat_id,
-                            tableId,
-                            "-1",
-                            item.count,
-                            item.kot_ncv,
-                            item.local_sp_inst,
-                            item.kitchen_cat_id,
-                            item.item_tax,
-                            data[0],
-                            data[1], 0
-                        )
-
-                        if (item.isChecked) {
-                            db!!.UpdateTableItem(tableItem)
-                            adapterParent!!.refreshList(tableId, position)
-                            showAnim()
-                        } else {
-                            db!!.InsertTableItems(tableItem)
-                            showAnim()
-                            adapterParent!!.refreshList(tableId, position)
-                        }
-                    }
-                })
-
+                setAdapterParent(list)
                 if (adapterParent == null) {
                     binding!!.recyclerview.isNestedScrollingEnabled = false
                     binding!!.recyclerview.adapter = adapterParent
@@ -539,6 +508,89 @@ class MenuViewActivity : BaseActivity() {
             }
         })
 
+    }
+
+    private fun  setAdapterParent( list: ArrayList<MenuData>){
+        adapterParent = TableKotAdapter(this@MenuViewActivity, list, object :
+            TableKotAdapter.SetOnItemClick {
+            override fun onItemScroll(position: Int) {
+                binding!!.recyclerview.scrollToPosition(position)
+            }
+
+            override fun onItemClicked(position: Int, item: Item, parent: MenuData) {
+                addItemDialog(
+                    position,
+                    item.isChecked,
+                    item,
+                    item.item_cat_id
+                )
+            }
+
+            override fun onItemDelete(
+                position: Int,
+                item: Item,
+                parent: MenuData,
+                values: Int
+            ) {
+                db!!.deleteItemOfTable(tableId, item.id)
+                if (item.item_cat_id == -1) {
+                    adapterParent!!.refreshList(tableId, -1)
+                    adapterParent!!.refreshList(tableId, position)
+                } else {
+                    adapterParent!!.refreshList(tableId, position)
+                    adapterParent!!.refreshList(tableId, -1)
+                }
+//                        val mPosition = if (db!!.isItemFromFSI(item.id)) -1 else position
+//                        adapterParent!!.refreshList(tableId, mPosition)
+                showAnim()
+            }
+
+            override fun onItemUpdate(
+                position: Int,
+                item: Item,
+                parent: MenuData,
+                values: Int
+            ) {
+                val ncv = if (kotNcv == 0) item.kot_ncv else kotNcv
+                val data = Utils.countTaxDiscount(
+                    if (item.kot_ncv == 0) {
+                        item.item_price
+                    } else 0.0,
+                    item.count,
+                    item.item_tax, 0f, 0, 0.0, 1
+                ).split("|")
+                val tableItem = CartItemRow(
+                    item.id,
+                    0,
+                    item.item_name,
+                    item.item_short_name
+                        ?: "",
+                    item.item_price,
+                    item.sp_inst
+                        ?: "",
+                    item.item_cat_id,
+                    tableId,
+                    "-1",
+                    item.count,
+                    ncv,
+                    item.local_sp_inst,
+                    item.kitchen_cat_id,
+                    item.item_tax,
+                    data[0],
+                    data[1], 0
+                )
+
+                if (item.isChecked) {
+                    db!!.UpdateTableItemQty(tableItem)
+                    adapterParent!!.refreshList(tableId, position)
+                    showAnim()
+                } else {
+                    db!!.InsertTableItems(tableItem)
+                    showAnim()
+                    adapterParent!!.refreshList(tableId, position)
+                }
+            }
+        })
     }
 
     private fun showAnim() {
@@ -658,10 +710,11 @@ class MenuViewActivity : BaseActivity() {
                 val data = Utils.countTaxDiscount(
                     if (item.kot_ncv == 0) {
                         item.item_price
-                    } else 0,
+                    } else 0.0,
                     item.count,
                     item.item_tax, 0f, 0, 0.0, 1
                 ).split("|")
+                val ncv = if (kotNcv == 0) item.kot_ncv else kotNcv
                 val tableItem = CartItemRow(
                     item.id,
                     0,
@@ -675,7 +728,7 @@ class MenuViewActivity : BaseActivity() {
                     tableId,
                     "-1",
                     item.count,
-                    item.kot_ncv,
+                    ncv,
                     item.local_sp_inst,
                     item.kitchen_cat_id,
                     item.item_tax,
@@ -702,9 +755,9 @@ class MenuViewActivity : BaseActivity() {
 
     private fun submitKOT() {
         val list: List<CartItemRow> = db!!.GetCartItems(tableId)
-
         showProgressDialog(this@MenuViewActivity)
         val arrOrder = JSONArray()
+        Log.e("dkadaldj", "KOT_NCV : $kotNcv")
         for (item in list) {
             val obj = JSONObject()
             obj.put("id", item.id)
@@ -714,9 +767,9 @@ class MenuViewActivity : BaseActivity() {
             obj.put("item_short_name", item.item_short_name)
             obj.put("kitchen_cat_id", item.kitchen_cat_id)
             obj.put("item_tax", item.item_tax)
-//            obj.put("item_tax_amt", item.item_tax_amt)
-//            obj.put("item_amt", item.item_amt)
-            obj.put("kot_ncv", if (kotNcv == 0) item.kot_ncv else kotNcv)
+            val ncv = if (this.kotNcv == 0) item.kot_ncv else kotNcv
+            Log.e("dkadaldj", "KOT_NCV item : $ncv")
+            obj.put("kot_ncv", ncv)
             if (!item.notes.isNullOrEmpty()) obj.put(
                 "notes", item.notes!!.replace("[", "")
                     .replace("]", "").replace("\"", "").replace("null", "")
@@ -725,6 +778,20 @@ class MenuViewActivity : BaseActivity() {
             arrOrder.put(obj)
         }
         val jsonObj = JSONObject()
+        Log.e(
+            "dhdshfkh",
+            "CD Data :: $strName , $strContactNumber , $strGST , $strPerson , $address"
+        )
+        val cd = JSONObject()
+        cd.put("cn", strName)
+        cd.put("cm", strContactNumber)
+        cd.put("cgn", strGST)
+        cd.put("ca", address)
+        cd.put("nop", strPerson)
+        Log.e(
+            "dhdshfkh",
+            "CD Data :: ${cd.toString()}"
+        )
         val cv = JSONObject()
         jsonObj.put("ca", KOT)
         cv.put("sid", pref!!.getInt(this, "sid"))
@@ -732,9 +799,69 @@ class MenuViewActivity : BaseActivity() {
         cv.put("table_id", tableId)
         cv.put("type", type)
         cv.put("kot", arrOrder)
+        cv.put("cd", cd)
         jsonObj.put("cv", cv)
+        persons = strPerson
+        currentJsonData = jsonObj
         sendMessageToServer(jsonObj, SocketForegroundService.ACTION_KOT)
     }
+
+    fun addChipsFromInput(edtSpecialInst: EditText, chipGroup: ChipGroup, context: Context) {
+        val inputText = edtSpecialInst.text.toString()
+        val items = inputText.split(",").map { it.trim() }.filter { it.isNotBlank() } // Clean input
+
+        for (item in items) {
+            var chipExists = false
+
+            // Check if chip already exists
+            for (i in 0 until chipGroup.childCount) {
+                val existingChip = chipGroup.getChildAt(i) as Chip
+                if (existingChip.text.toString().equals(item, ignoreCase = true)) {
+                    chipExists = true
+                    break
+                }
+            }
+
+            if (!chipExists) { // Only add new chips
+                val chip = Chip(context)
+                chip.text = item
+                chip.setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst)
+                chip.isCheckedIconVisible = false
+                chip.isCheckable = true
+                chip.setTextAppearance(R.style.ChipTextAppearance)
+                chip.isCloseIconVisible = true // Allow chip removal
+
+                // Handle chip removal
+                chip.setOnCloseIconClickListener {
+                    chipGroup.removeView(chip) // Remove chip from ChipGroup
+                    updateEditText(edtSpecialInst, chipGroup) // Update EditText
+                }
+
+                // Handle checked state change
+                chip.setOnCheckedChangeListener { _, _ ->
+                    updateEditText(edtSpecialInst, chipGroup)
+                }
+
+                chipGroup.addView(chip)
+                chip.isChecked = true
+            }
+        }
+
+        // Clear input after adding chips
+        edtSpecialInst.text = null
+    }
+
+    // Function to update EditText based on existing chips
+    fun updateEditText(edtSpecialInst: EditText, chipGroup: ChipGroup) {
+        val remainingChips = mutableListOf<String>()
+        for (i in 0 until chipGroup.childCount) {
+            val chip = chipGroup.getChildAt(i) as Chip
+            remainingChips.add(chip.text.toString())
+        }
+        edtSpecialInst.setText(remainingChips.joinToString(", "))
+        edtSpecialInst.setSelection(edtSpecialInst.text.toString().length)
+    }
+
 
     private fun addItemDialog(position: Int, isEdit: Boolean, item: Item, parent_id: Int) {
         var count = 1
@@ -759,24 +886,41 @@ class MenuViewActivity : BaseActivity() {
             if (edtSpecialInst.text.toString().isNullOrEmpty()) {
                 edtSpecialInst.error = resources.getString(R.string.enter_special_instruction_name)
             } else {
-                val chip = Chip(this@MenuViewActivity)
-                chip.text = edtSpecialInst.text.toString()
-                chip.setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst)
-                chip.isCheckedIconVisible = false
-                chip.isCheckable = true
-                chip.setTextAppearance(R.style.ChipTextAppearance)
-                chip.setOnCheckedChangeListener { _, _ ->
-                    edtSpecialInst.setText(
-                        Utils.getCheckedIns(
-                            edtSpecialInst.text.toString(),
-                            chipGroup
-                        )
-                    )
-                    edtSpecialInst.setSelection(edtSpecialInst.text.toString().length)
+                val inputText = edtSpecialInst.text.toString()
+                val items =
+                    inputText.split(",").map { it.trim() } // Split input by comma and trim spaces
+                for (item in items) {
+                    if (item.isNotEmpty()) { // Avoid adding empty chips
+                        val chip = Chip(this@MenuViewActivity)
+                        chip.text = item
+                        chip.setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst)
+                        chip.isCheckedIconVisible = false
+                        chip.isCheckable = true
+                        chip.setTextAppearance(R.style.ChipTextAppearance)
+                        chip.setOnCheckedChangeListener { c, isChecked ->
+                            edtSpecialInst.setText(
+                                chip.text.toString()
+                            )
+                            if (isChecked) {
+                                c.setTextAppearance(R.style.CheckedChipTextAppearance)
+                                c.setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst_checked)
+                            } else {
+                                edtSpecialInst.text = null
+                                c.setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst)
+                                c.setTextAppearance(R.style.ChipTextAppearance)
+                            }
+                            edtSpecialInst.setSelection(edtSpecialInst.text.toString().length)
+                        }
+
+                        chip.isChecked = true
+                        if (chip.isChecked) {
+                            chip.setTextAppearance(R.style.CheckedChipTextAppearance)
+                            chip.setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst_checked)
+                        }
+                        chipGroup.addView(chip)
+                    }
                 }
-                chipGroup.addView(chip)
-                chip.isChecked = true
-                edtSpecialInst.setText(null)
+                edtSpecialInst.text = null // Clear input after adding chips
             }
         }
         val name: AppCompatTextView = dialog.findViewById(R.id.tv_item_name)!!
@@ -849,6 +993,7 @@ class MenuViewActivity : BaseActivity() {
             notes = cart.notes
             localInst = if (notes.isNullOrEmpty()) emptyList() else notes.split(",")
             count = item.count
+            tvItemPrice.setText("${cart.item_price}")
             var inst = ""
             if (!notes.isNullOrEmpty()) {
                 localInst = try {
@@ -888,6 +1033,7 @@ class MenuViewActivity : BaseActivity() {
         tvQty.setText("$count")
 
         val linOrderNcv: LinearLayout = dialog.findViewById(R.id.lin_order_ncv)!!
+        val layoutNVC: LinearLayout = dialog.findViewById(R.id.layoutNCV)!!
         val btnComplimentary: AppCompatTextView = dialog.findViewById(R.id.btn_complimentary)!!
         val btnVoid: AppCompatTextView = dialog.findViewById(R.id.btn_void)!!
         btnComplimentary.setOnClickListener {
@@ -900,7 +1046,6 @@ class MenuViewActivity : BaseActivity() {
                     tvItemPrice.setSelection(tvItemPrice.text.toString().length)
                 }
             } else {
-
                 tvItemPrice.setText("0")
                 tvItemPrice.setSelection(tvItemPrice.text.toString().length)
                 btnVoid.backgroundTintList = GetColor(R.color.light_grey)
@@ -970,22 +1115,30 @@ class MenuViewActivity : BaseActivity() {
         when (kotNcv) {
             0 -> {
                 linOrderNcv.visibility = View.VISIBLE
+                layoutNVC.visibility = View.VISIBLE
             }
 
             1 -> {
                 linOrderNcv.visibility = View.GONE
+                layoutNVC.visibility = View.GONE
                 tvItemPrice.setText("0")
                 tvItemPrice.isEnabled = false
             }
 
             2 -> {
+                linOrderNcv.visibility = View.GONE
                 btnVoid.visibility = View.GONE
+                layoutNVC.visibility = View.GONE
+//                layoutNVC.visibility = View.VISIBLE
                 tvItemPrice.setText("0")
                 tvItemPrice.isEnabled = false
             }
 
             3 -> {
+                linOrderNcv.visibility = View.GONE
                 btnComplimentary.visibility = View.GONE
+                layoutNVC.visibility = View.GONE
+//                layoutNVC.visibility = View.VISIBLE
                 tvItemPrice.setText("0")
                 tvItemPrice.isEnabled = false
             }
@@ -1023,7 +1176,7 @@ class MenuViewActivity : BaseActivity() {
             }
             val data = Utils.countTaxDiscount(
                 if (item.kot_ncv == 0) {
-                    tvItemPrice.text.toString().toInt()
+                    tvItemPrice.text.toString().toDouble()
                 } else item.item_price, count, item.item_tax, 0f, 0, 0.0, 1
             ).split("|")
 
@@ -1032,7 +1185,7 @@ class MenuViewActivity : BaseActivity() {
                 0,
                 item.item_name ?: "",
                 item.item_short_name
-                    ?: "", tvItemPrice.text.toString().toInt(),
+                    ?: "", tvItemPrice.text.toString().toDouble(),
                 item.sp_inst
                     ?: "",
                 parent_id,
@@ -1099,24 +1252,33 @@ class MenuViewActivity : BaseActivity() {
             if (edtSpecialInst.text.toString().isNullOrEmpty()) {
                 edtSpecialInst.error = resources.getString(R.string.enter_special_instruction_name)
             } else {
-                val chip = Chip(this@MenuViewActivity)
-                chip.text = edtSpecialInst.text.toString()
-                chip.setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst)
-                chip.isCheckedIconVisible = false
-                chip.isCheckable = true
-                chip.setTextAppearance(R.style.ChipTextAppearance)
-                chip.setOnCheckedChangeListener { _, _ ->
-                    edtSpecialInst.setText(
-                        Utils.getCheckedIns(
-                            edtSpecialInst.text.toString(),
-                            chipGroup
-                        )
-                    )
-                    edtSpecialInst.setSelection(edtSpecialInst.text.toString().length)
+                val inputText = edtSpecialInst.text.toString()
+                val items =
+                    inputText.split(",").map { it.trim() } // Split input by comma and trim spaces
+                Log.e("flkjfldjl", " ITEMS :: $items")
+                for (item in items) {
+                    if (item.isNotEmpty()) { // Avoid adding empty chips
+                        val chip = Chip(this@MenuViewActivity)
+                        chip.text = item
+                        chip.setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst)
+                        chip.isCheckedIconVisible = false
+                        chip.isCheckable = true
+                        chip.setTextAppearance(R.style.ChipTextAppearance)
+
+                        chip.setOnCheckedChangeListener { _, _ ->
+                            edtSpecialInst.setText(
+                                Utils.getCheckedIns(
+                                    edtSpecialInst.text.toString(),
+                                    chipGroup
+                                )
+                            )
+                            edtSpecialInst.setSelection(edtSpecialInst.text.toString().length)
+                        }
+                        chipGroup.addView(chip)
+                        chip.isChecked = true
+                    }
                 }
-                chipGroup.addView(chip)
-                chip.isChecked = true
-                edtSpecialInst.setText(null)
+                edtSpecialInst.text = null // Clear input after adding chips
             }
         }
         val name: AppCompatTextView = dialog.findViewById(R.id.tv_item_name)!!
@@ -1167,7 +1329,6 @@ class MenuViewActivity : BaseActivity() {
         } else {
             try {
                 val gson = Gson()
-
                 val type: Type = object : TypeToken<List<String>>() {}.type
                 gson.fromJson(item.notes, type)
             } catch (e: Exception) {
@@ -1224,6 +1385,7 @@ class MenuViewActivity : BaseActivity() {
             }
         }
         val linOrderNcv: LinearLayout = dialog.findViewById(R.id.lin_order_ncv)!!
+        val layoutNCV: LinearLayout = dialog.findViewById(R.id.layoutNCV)!!
         val btnComplimentary: AppCompatTextView = dialog.findViewById(R.id.btn_complimentary)!!
         val btnVoid: AppCompatTextView = dialog.findViewById(R.id.btn_void)!!
         btnComplimentary.setOnClickListener {
@@ -1236,7 +1398,6 @@ class MenuViewActivity : BaseActivity() {
                     tvItemPrice.setSelection(tvItemPrice.text.toString().length)
                 }
             } else {
-
                 tvItemPrice.setText("0")
                 tvItemPrice.setSelection(tvItemPrice.text.toString().length)
                 btnVoid.backgroundTintList = GetColor(R.color.light_grey)
@@ -1321,18 +1482,21 @@ class MenuViewActivity : BaseActivity() {
             }
 
             1 -> {
+
                 linOrderNcv.visibility = View.GONE
                 tvItemPrice.setText("0")
                 tvItemPrice.isEnabled = false
             }
 
             2 -> {
+                linOrderNcv.visibility = View.GONE
                 btnVoid.visibility = View.GONE
                 tvItemPrice.setText("0")
                 tvItemPrice.isEnabled = false
             }
 
             3 -> {
+                linOrderNcv.visibility = View.GONE
                 btnComplimentary.visibility = View.GONE
                 tvItemPrice.setText("0")
                 tvItemPrice.isEnabled = false
@@ -1375,10 +1539,9 @@ class MenuViewActivity : BaseActivity() {
             }
             val data = Utils.countTaxDiscount(
                 if (item.kot_ncv == 0) {
-                    tvItemPrice.text.toString().toInt()
+                    tvItemPrice.text.toString().toDouble()
                 } else item.item_price, count, item.item_tax, 0f, 0, 0.0, 1
             ).split("|")
-            val amt = tvItemPrice.text.toString().toDouble() * count
 
             val tableItem =
                 CartItemRow(
@@ -1386,7 +1549,7 @@ class MenuViewActivity : BaseActivity() {
                     0,
                     item.item_name,
                     item.item_short_name,
-                    tvItemPrice.text.toString().toInt(),
+                    tvItemPrice.text.toString().toDouble(),
                     item.sp_inst,
                     item.item_cat_id,
                     tableId,
@@ -1441,6 +1604,11 @@ class MenuViewActivity : BaseActivity() {
                 true
             }
 
+            R.id.pre_order -> {
+                customerDialog(false)
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -1456,35 +1624,36 @@ class MenuViewActivity : BaseActivity() {
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.behavior.peekHeight = metrics.heightPixels
 
-        val regular = bottomSheetDialog.findViewById<TextView>(R.id.txt_regular)!!
-        val noCharge = bottomSheetDialog.findViewById<TextView>(R.id.txt_no_charge)!!
-        val complimentary = bottomSheetDialog.findViewById<TextView>(R.id.txt_complimentary)!!
-        val void = bottomSheetDialog.findViewById<TextView>(R.id.txt_void)!!
+        val regular = bottomSheetDialog.findViewById<LinearLayout>(R.id.btn_regular)!!
+        val noCharge = bottomSheetDialog.findViewById<LinearLayout>(R.id.btn_no_charge)!!
+        val complimentary = bottomSheetDialog.findViewById<LinearLayout>(R.id.btn_complimentary)!!
+        val void = bottomSheetDialog.findViewById<LinearLayout>(R.id.btn_void)!!
         val pad =
             this@MenuViewActivity.resources.getDimension(com.intuit.sdp.R.dimen._12sdp).toInt()
+        val itemsCart = db!!.GetCartItems(tableId)
         when (kotNcv) {
             0 -> {
-                regular.setBackgroundResource(R.drawable.shape_red_border_round)
+                regular.setBackgroundResource(R.drawable.shape_red_border_round_new_nvc)
                 regular.setPadding(pad, pad, pad, pad)
             }
 
             1 -> {
-                noCharge.setBackgroundResource(R.drawable.shape_red_border_round)
+                noCharge.setBackgroundResource(R.drawable.shape_red_border_round_new_nvc)
                 noCharge.setPadding(pad, pad, pad, pad)
             }
 
             2 -> {
-                complimentary.setBackgroundResource(R.drawable.shape_red_border_round)
+                complimentary.setBackgroundResource(R.drawable.shape_red_border_round_new_nvc)
                 complimentary.setPadding(pad, pad, pad, pad)
             }
 
             3 -> {
-                void.setBackgroundResource(R.drawable.shape_red_border_round)
+                void.setBackgroundResource(R.drawable.shape_red_border_round_new_nvc)
                 void.setPadding(pad, pad, pad, pad)
             }
         }
         regular.setOnClickListener {
-            regular.setBackgroundResource(R.drawable.shape_red_border_round)
+            regular.setBackgroundResource(R.drawable.shape_red_border_round_new_nvc)
             noCharge.setBackgroundResource(R.drawable.shape_grey_border_white)
             complimentary.setBackgroundResource(R.drawable.shape_grey_border_white)
             void.setBackgroundResource(R.drawable.shape_grey_border_white)
@@ -1498,11 +1667,12 @@ class MenuViewActivity : BaseActivity() {
                     else -> R.drawable.ic_regular
                 }
             )
+            db!!.UpdateTableItemsNcv(itemsCart, kotNcv)
             bottomSheetDialog.cancel()
         }
         noCharge.setOnClickListener {
             regular.setBackgroundResource(R.drawable.shape_grey_border_white)
-            noCharge.setBackgroundResource(R.drawable.shape_red_border_round)
+            noCharge.setBackgroundResource(R.drawable.shape_red_border_round_new_nvc)
             complimentary.setBackgroundResource(R.drawable.shape_grey_border_white)
             void.setBackgroundResource(R.drawable.shape_grey_border_white)
             noCharge.setPadding(pad, pad, pad, pad)
@@ -1515,12 +1685,13 @@ class MenuViewActivity : BaseActivity() {
                     else -> R.drawable.ic_regular
                 }
             )
+            db!!.UpdateTableItemsNcv(itemsCart, kotNcv)
             bottomSheetDialog.cancel()
         }
         complimentary.setOnClickListener {
             regular.setBackgroundResource(R.drawable.shape_grey_border_white)
             noCharge.setBackgroundResource(R.drawable.shape_grey_border_white)
-            complimentary.setBackgroundResource(R.drawable.shape_red_border_round)
+            complimentary.setBackgroundResource(R.drawable.shape_red_border_round_new_nvc)
             void.setBackgroundResource(R.drawable.shape_grey_border_white)
             complimentary.setPadding(pad, pad, pad, pad)
             kotNcv = 2
@@ -1532,13 +1703,14 @@ class MenuViewActivity : BaseActivity() {
                     else -> R.drawable.ic_regular
                 }
             )
+            db!!.UpdateTableItemsNcv(itemsCart, kotNcv)
             bottomSheetDialog.cancel()
         }
         void.setOnClickListener {
             regular.setBackgroundResource(R.drawable.shape_grey_border_white)
             noCharge.setBackgroundResource(R.drawable.shape_grey_border_white)
             complimentary.setBackgroundResource(R.drawable.shape_grey_border_white)
-            void.setBackgroundResource(R.drawable.shape_red_border_round)
+            void.setBackgroundResource(R.drawable.shape_red_border_round_new_nvc)
             void.setPadding(pad, pad, pad, pad)
             kotNcv = 3
             ncv!!.setIcon(
@@ -1549,6 +1721,7 @@ class MenuViewActivity : BaseActivity() {
                     else -> R.drawable.ic_regular
                 }
             )
+            db!!.UpdateTableItemsNcv(itemsCart, kotNcv)
             bottomSheetDialog.cancel()
         }
     }
@@ -1617,7 +1790,7 @@ class MenuViewActivity : BaseActivity() {
                         val data = Utils.countTaxDiscount(
                             if (item.kot_ncv == 0) {
                                 item.item_price
-                            } else 0, cart.qty, cart.item_tax, 0f, 0, 0.0, 1
+                            } else 0.0, cart.qty, cart.item_tax, 0f, 0, 0.0, 1
                         ).split("|")
 
                         val tableItem =
@@ -1655,7 +1828,7 @@ class MenuViewActivity : BaseActivity() {
                         val data = Utils.countTaxDiscount(
                             if (item.kot_ncv == 0) {
                                 item.item_price
-                            } else 0, cart.qty, cart.item_tax, 0f, 0, 0.0, 1
+                            } else 0.0, cart.qty, cart.item_tax, 0f, 0, 0.0, 1
                         ).split("|")
 
                         val tableItem =
@@ -1719,4 +1892,66 @@ class MenuViewActivity : BaseActivity() {
         )
     }
 
+    private fun customerDialog(isEdit: Boolean) {
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(true)
+        dialog.setCanceledOnTouchOutside(true)
+        dialog.setContentView(R.layout.dialog_customer_details)
+        val tvContactNumber: AutoCompleteTextView =
+            dialog.findViewById(R.id.tv_contact_number) as AutoCompleteTextView
+        val tvName: TextInputEditText = dialog.findViewById(R.id.tv_name) as TextInputEditText
+        val tvPerson: TextInputEditText = dialog.findViewById(R.id.tv_ppl) as TextInputEditText
+        val tvGst: TextInputEditText = dialog.findViewById(R.id.tv_gst) as TextInputEditText
+        val tvAddress: TextInputEditText =
+            dialog.findViewById(R.id.edt_address) as TextInputEditText
+
+        val btnOk = dialog.findViewById(R.id.btn_ok) as MaterialButton
+        val cancel = dialog.findViewById(R.id.tv_cancel) as MaterialButton
+        tvName.setText(strName)
+        tvContactNumber.setText(strContactNumber)
+        tvPerson.setText(strPerson.toString())
+        tvAddress.setText(strAdd)
+        tvGst.setText(strGST)
+        tvPerson.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                tvPerson.text!!.clear()
+            }
+        }
+        tvContactNumber.tag = "0"
+        tvContactNumber.addTextChangedListener {
+            if (tvContactNumber.text.toString().length == 10 && tvContactNumber.text.toString()
+                    .isDigitsOnly()
+            ) {
+                if (tvContactNumber.tag.toString() == "0") {
+
+                } else {
+                    tvContactNumber.tag = "0"
+                }
+            }
+        }
+
+        btnOk.setOnClickListener {
+            strContactNumber =
+                if (!tvContactNumber.text.isNullOrBlank()) tvContactNumber.text.toString() else ""
+            strName =
+                if (!tvName.text.isNullOrBlank()) tvName.text.toString() else "-"
+            strPerson = if (!tvPerson.text.isNullOrBlank()) tvPerson.text.toString().toInt() else 1
+            strAdd = if (!tvAddress.text.isNullOrBlank()) tvAddress.text.toString() else ""
+            strGST = if (!tvGst.text.isNullOrBlank()) tvGst.text.toString() else ""
+            dialog.dismiss()
+        }
+
+        cancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        Objects.requireNonNull(dialog.window)
+            ?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        dialog.window!!.setGravity(Gravity.CENTER)
+        dialog.show()
+    }
 }

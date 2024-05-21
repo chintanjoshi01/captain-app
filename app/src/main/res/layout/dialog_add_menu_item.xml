@@ -138,6 +138,7 @@
             android:background="@color/colorSecondaryVariant_light3" />
 
         <LinearLayout
+            android:id="@+id/layoutNCV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_6sdp"
@@ -186,6 +187,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/layoutPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_12sdp"

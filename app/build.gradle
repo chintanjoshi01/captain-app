@@ -4,18 +4,19 @@ plugins {
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
     namespace 'com.eresto.captain'
     compileSdk 34
-    buildToolsVersion "30.0.3"
     defaultConfig {
         applicationId "com.eresto.captain"
         minSdk 21
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 29
+        versionName "1.0.28"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -29,11 +30,19 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            applicationIdSuffix ".cj"
+            versionNameSuffix "-cj"
+            minifyEnabled true
+            shrinkResources true
+//            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled false
+            applicationIdSuffix ".cj"
+           versionNameSuffix "-cj"
+            minifyEnabled true
+            shrinkResources true
+            debuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -63,6 +72,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:+'
     implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.constraintlayout:constraintlayout:+'
+    implementation 'com.google.firebase:firebase-crashlytics:19.4.1'
+    implementation 'com.google.firebase:firebase-analytics:22.3.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:+'
     androidTestImplementation 'androidx.test.espresso:espresso-core:+'
@@ -70,7 +81,8 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
-    implementation 'com.intuit.sdp:sdp-android:1.0.6'
+    implementation 'com.intuit.sdp:sdp-android:1.1.0'
+    implementation 'com.intuit.ssp:ssp-android:1.1.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     // glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'
