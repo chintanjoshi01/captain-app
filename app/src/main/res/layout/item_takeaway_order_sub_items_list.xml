@@ -1,76 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Using ConstraintLayout for a flatter, more flexible hierarchy -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutChild"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:background="@color/color_white"
+    android:paddingStart="@dimen/_8sdp"
+    android:paddingTop="@dimen/_8sdp"
+    android:paddingEnd="@dimen/_8sdp">
 
-    <RelativeLayout
-        android:id="@+id/layoutChild"
-        android:layout_width="match_parent"
+    <!-- Status/Action Icon -->
+    <ImageView
+        android:id="@+id/image_deleteKotItem"
+        android:layout_width="@dimen/_10sdp"
+        android:layout_height="@dimen/_10sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/text_section_name"
+        tools:srcCompat="@drawable/ic_check_circle" />
+
+    <!-- Item Name -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_section_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/color_white"
-        android:orientation="vertical">
+        android:layout_marginStart="@dimen/_8sdp"
+        android:ellipsize="end"
+        android:fontFamily="@font/nunito_semibold"
+        android:maxLines="1"
+        android:textColor="@color/colorSecondary"
+        android:textSize="@dimen/kot_item_name_size"
+        app:layout_constraintEnd_toStartOf="@+id/txt_qty"
+        app:layout_constraintStart_toEndOf="@+id/image_deleteKotItem"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="PANEER TIKKA MASALA" />
 
-        <LinearLayout
-            android:id="@+id/lin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@+id/txt_qty"
-            android:orientation="horizontal">
+    <!-- Special Instructions -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_sp_inst"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:fontFamily="@font/nunito_regular"
+        android:textColor="@color/colorSecondaryVariant"
+        android:textSize="@dimen/kot_item_details_size"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/text_section_name"
+        app:layout_constraintStart_toStartOf="@+id/text_section_name"
+        app:layout_constraintTop_toBottomOf="@+id/text_section_name"
+        tools:text="Extra spicy, Less oil"
+        tools:visibility="visible" />
 
-            <ImageView
-                android:id="@+id/image_deleteKotItem"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:padding="@dimen/_1sdp"
-                android:visibility="visible"
-                app:srcCompat="@drawable/ic_check_circle" />
+    <!-- Quantity -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/txt_qty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:fontFamily="@font/nunito_semibold"
+        android:textColor="@color/colorSecondary"
+        android:textSize="@dimen/kot_item_name_size"
+        app:layout_constraintBottom_toBottomOf="@+id/text_section_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/text_section_name"
+        tools:text="x2" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+    <!-- Divider -->
+    <View
+        android:id="@+id/v"
+        android:layout_width="0dp"
+        android:layout_height="0.5dp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:alpha="0.5"
+        android:background="@color/colorSecondary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/text_section_name"
+        app:layout_constraintTop_toBottomOf="@+id/text_sp_inst" />
 
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_section_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/nunito_semibold"
-                    android:lines="1"
-                    android:text="ITEMS "
-                    android:textColor="@color/colorSecondary"
-                    android:textSize="@dimen/kot_item_name_size" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_sp_inst"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/nunito_regular"
-                    android:text="SP IN"
-                    android:textColor="@color/colorSecondaryVariant"
-                    android:textSize="@dimen/kot_item_details_size" />
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/txt_qty"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/_20sdp"
-            android:layout_alignParentEnd="true"
-            android:buttonTint="@color/colorPrimary"
-            android:fontFamily="@font/nunito_regular"
-            android:layoutDirection="rtl" />
-
-        <View
-            android:id="@+id/v"
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:layout_below="@+id/lin"
-            android:alpha="0.5"
-            android:background="@color/colorSecondary" />
-    </RelativeLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

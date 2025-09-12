@@ -13,6 +13,9 @@
 
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
+        <!-- Don’t hide system bars -->
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:fitsSystemWindows">true</item>
     </style>
     <style name="tabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">@dimen/_12sdp</item>

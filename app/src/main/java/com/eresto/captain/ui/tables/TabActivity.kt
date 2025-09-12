@@ -158,7 +158,7 @@ class TabActivity : BaseActivity() {
                 else -> {
                     displayActionSnackbarBottom(
                         this@TabActivity,
-                        "Make Operation from POS",
+                        "Make Operation from Eresto Edge",
                         2,
                         false,
                         "Okay",
@@ -216,6 +216,7 @@ class TabActivity : BaseActivity() {
                 intent.putExtra("message", json)
                 resultLauncher.launch(intent)
             } else {
+
                 // The table has become free, launch the menu to start a new order
                 val intent = Intent(this@TabActivity, MenuViewActivity::class.java)
                 intent.putExtra("table_name", tab.tab_label)

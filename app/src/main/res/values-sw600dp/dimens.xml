@@ -121,4 +121,21 @@
     <dimen name="dialog_alert_button_height">56dp</dimen>
     <dimen name="dialog_alert_button_container_margin_top">32dp</dimen>
     <dimen name="dialog_alert_button_spacing">16dp</dimen>
+
+
+    <!-- Taller row height for a more spacious feel on tablets -->
+    <dimen name="kot_sub_item_row_height">72dp</dimen>
+
+    <!-- More padding and larger icons for easier tapping -->
+    <dimen name="item_padding_horizontal">20dp</dimen>
+    <dimen name="item_icon_size">32dp</dimen>
+
+    <!-- Larger, more readable fonts on bigger screens -->
+    <dimen name="item_font_size_title">18sp</dimen>
+    <dimen name="item_font_size_subtitle">16sp</dimen>
+
+    <!-- Deprecated sdp values (if needed) -->
+    <dimen name="_8sdp">8dp</dimen>
+    <dimen name="_20sdp">20dp</dimen>
+    <dimen name="_2sdp">2dp</dimen>
 </resources>

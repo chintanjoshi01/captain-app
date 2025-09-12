@@ -151,6 +151,24 @@
     <dimen name="dialog_alert_button_container_margin_top">24dp</dimen>
     <dimen name="dialog_alert_button_spacing">8dp</dimen>
 
+    <dimen name="kot_sub_item_height">48dp</dimen>
+    <dimen name="kot_sub_max_height">192dp</dimen>
 
+
+    <!-- Height for each item row. Crucial for scrolling calculation in the adapter -->
+    <dimen name="kot_sub_item_row_height">56dp</dimen>
+
+    <!-- General spacing and sizes -->
+    <dimen name="item_padding_horizontal">12dp</dimen>
+    <dimen name="item_icon_size">24dp</dimen>
+
+    <!-- Font sizes -->
+    <dimen name="item_font_size_title">14sp</dimen>
+    <dimen name="item_font_size_subtitle">12sp</dimen>
+
+    <!-- Deprecated sdp values you might still use elsewhere -->
+    <dimen name="_8sdp">8dp</dimen>
+    <dimen name="_20sdp">20dp</dimen>
+    <dimen name="_2sdp">2dp</dimen>
 
 </resources>

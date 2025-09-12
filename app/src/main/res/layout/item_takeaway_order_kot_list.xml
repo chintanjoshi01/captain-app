@@ -90,10 +90,14 @@
 
             </RelativeLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
+            <com.eresto.captain.utils.MaxHeightRecyclerView
                 android:id="@+id/recyclerviewItem_kot"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="true"
+                android:overScrollMode="always"
+                android:scrollbars="vertical"
+                app:maxHeight="@dimen/kot_sub_max_height"
                 android:visibility="gone" />
 
         </LinearLayout>

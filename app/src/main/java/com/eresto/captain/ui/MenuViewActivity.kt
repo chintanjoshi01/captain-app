@@ -25,7 +25,6 @@ import android.view.Window
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -61,7 +60,6 @@ import com.eresto.captain.utils.Utils
 import com.eresto.captain.utils.Utils.Companion.displayActionSnackbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
@@ -129,12 +127,21 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val isTabletDevice = resources.getBoolean(R.bool.isTablet)
+        requestedOrientation = if (isTabletDevice) {
+            // If it's a tablet, lock to LANDSCAPE.
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else {
+            // If it's a phone, lock to PORTRAIT.
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
         binding = ActivityViewMenuBinding.inflate(layoutInflater)
 
         setContentView(binding!!.root)
 
         // TABLET: Detect if the tablet layout is active by checking for a view that only exists in it.
-        isTablet = binding!!.root.findViewById<View>(R.id.kot_summary_container) != null
+        isTablet = resources.getBoolean(R.bool.isTablet)
 
 
         // --- Load Intent Data ---
@@ -175,15 +182,15 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
         selectedPriceTemplate = pref!!.getInt(this@MenuViewActivity, "def_pt")
 
         // --- Main RecyclerView Setup (common for both phone and tablet) ---
-        binding!!.recyclerview.layoutManager = LinearLayoutManager(this@MenuViewActivity)
-        binding!!.recyclerview.setHasFixedSize(true)
+        binding?.recyclerview?.layoutManager = LinearLayoutManager(this@MenuViewActivity)
+        binding?.recyclerview?.setHasFixedSize(true)
 
         // TABLET: Add dividers to the item list for a cleaner look
         if (isTablet) {
             ContextCompat.getDrawable(this, R.drawable.divider_line)?.let {
                 val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
                 divider.setDrawable(it)
-                binding!!.recyclerview.addItemDecoration(divider)
+                binding?.recyclerview?.addItemDecoration(divider)
             }
         }
 
@@ -196,7 +203,7 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
 
         // --- Search Functionality (common for both) ---
         binding!!.edtSearch.setOnCloseListener {
-            binding!!.recyclerview.adapter = adapterParent
+            binding?.recyclerview?.adapter = adapterParent
             true
         }
         binding!!.edtSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -213,12 +220,12 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
 
                 when {
                     s.isEmpty() -> {
-                        if (pref!!.getStr(
+                        if (isTablet || pref!!.getStr(
                                 this@MenuViewActivity,
                                 KeyUtils.sortingKey
                             ) == "item_group"
                         ) {
-                            binding!!.recyclerview.adapter = adapterParent
+                            binding?.recyclerview?.adapter = adapterParent
                         } else {
                             getWaiterMenuList("")
                         }
@@ -228,7 +235,7 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
                     s.length > 1 -> setSearchAdapter(s)
                     s.isNotEmpty() -> {
                         if (!isTablet) binding!!.llMenu?.visibility = View.GONE
-                        binding!!.recyclerview.adapter = adapterSearch
+                        binding?.recyclerview?.adapter = adapterSearch
                     }
                 }
                 return true
@@ -483,7 +490,7 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
         if (isTablet || pref!!.getStr(this@MenuViewActivity, KeyUtils.sortingKey) == "item_group") {
             if (adapterParent == null || isHardChange) {
                 setAdapterParent(list)
-                binding!!.recyclerview.adapter = adapterParent
+                binding?.recyclerview?.adapter = adapterParent
             } else {
                 adapterParent!!.setItemList(list)
             }
@@ -491,7 +498,7 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
                 binding!!.llMenu?.visibility = View.VISIBLE
             } else {
                 adapterChild?.setItemList(listChild)
-                binding!!.recyclerview.adapter = adapterChild
+                binding?.recyclerview?.adapter = adapterChild
                 if (!isTablet) binding!!.llMenu?.visibility = View.GONE
             }
         } else { // Mobile specific item_name view
@@ -502,8 +509,8 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
         oldSelection = pref!!.getStr(this@MenuViewActivity, KeyUtils.sortingKey)
         dismissProgressDialog()
 
-        binding!!.recyclerview.clearOnScrollListeners() // Avoid adding multiple listeners
-        binding!!.recyclerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding?.recyclerview?.clearOnScrollListeners() // Avoid adding multiple listeners
+        binding?.recyclerview?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -699,11 +706,11 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
                         .sortedBy { it.category_name }
                     categoryList.addAll(distinctCategories)
 
-                    val rvCategories = binding!!.root.findViewById<RecyclerView>(R.id.rv_categories)
+                    val rvCategories = binding?.root?.findViewById<RecyclerView>(R.id.rv_categories)
                     categoryAdapter =
                         CategoryAdapter(this@MenuViewActivity, categoryList, this@MenuViewActivity)
-                    rvCategories.layoutManager = LinearLayoutManager(this@MenuViewActivity)
-                    rvCategories.adapter = categoryAdapter
+                    rvCategories?.layoutManager = LinearLayoutManager(this@MenuViewActivity)
+                    rvCategories?.adapter = categoryAdapter
                 }
             }
         }
@@ -791,7 +798,7 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
                     showAnim()
                 }
             })
-        binding!!.recyclerview.adapter = adapterSearch
+        binding?.recyclerview?.adapter = adapterSearch
     }
 
     private fun submitKOT() {
@@ -1631,6 +1638,29 @@ class MenuViewActivity : BaseActivity(), CategoryAdapter.OnCategoryClickListener
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
+
+        if (resources.getBoolean(R.bool.isTablet)) {
+            val window = dialog.window
+            if (window != null) {
+                // 1. Get the screen's width
+                val displayMetrics = activity!!.resources.displayMetrics
+                val screenWidth = displayMetrics.widthPixels
+
+                // 2. Calculate 40% of the screen width
+                val dialogWidth = (screenWidth * 0.40).toInt()
+
+                // 3. Get the current layout params and update them
+                val layoutParams = WindowManager.LayoutParams()
+                layoutParams.copyFrom(window.attributes)
+                layoutParams.width = dialogWidth
+                layoutParams.height =
+                    WindowManager.LayoutParams.WRAP_CONTENT // Keep height adaptive
+
+                // 4. Apply the new layout params to the dialog's window
+                window.attributes = layoutParams
+            }
+        }
+
         dialog.window!!.setGravity(Gravity.CENTER)
         dialog.show()
     }

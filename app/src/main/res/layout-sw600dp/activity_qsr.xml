@@ -68,6 +68,7 @@
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
                     android:clipToPadding="false"
+                    android:nestedScrollingEnabled="true"
                     android:paddingTop="@dimen/_8sdp"
                     android:paddingBottom="@dimen/_100sdp" />
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

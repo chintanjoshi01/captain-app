@@ -2,19 +2,11 @@ package com.eresto.captain.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
-import androidx.appcompat.widget.AppCompatImageButton
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
 import com.eresto.captain.R
 import com.eresto.captain.databinding.ItemTakeawayOrderKotListBinding
 import com.eresto.captain.databinding.ItemTakeawayOrderSubItemsListBinding
@@ -22,79 +14,40 @@ import com.eresto.captain.model.ItemQSR
 import com.eresto.captain.model.KotInstance
 import com.eresto.captain.utils.DBHelper
 import com.eresto.captain.utils.ItemServingStatus
+import com.eresto.captain.utils.MaxHeightRecyclerView
 import com.eresto.captain.utils.Utils
+
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.Locale
 
 class DineKOTAdapter(
-    var context: Context,
-    var isEdit: Boolean,
-    var isDeleteShow: Boolean,
-    var isUpdate: Boolean,
-    var isDelete: Boolean,
-    var menuList: List<Any>,
-    var database: DBHelper,
-    var setOnItemClick: SetOnItemClick?
+    private val context: Context,
+    private val isEdit: Boolean,
+    private val isDeleteShow: Boolean,
+    private val isUpdate: Boolean,
+    private val isDelete: Boolean,
+    private val menuList: List<Any>,
+    private val database: DBHelper,
+    private var setOnItemClick: SetOnItemClick?
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    inner class ViewHolderItemKot(val binding: ViewBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        internal var layout =
-            binding.root.findViewById<CardView>(R.id.category_parent_container_kot)
-        internal var textOrder = binding.root.findViewById<TextView>(R.id.text_order)
-        internal var textSectionTableName =
-            binding.root.findViewById<TextView>(R.id.text_section_table_name)
-        internal var txtTimeTakeaway = binding.root.findViewById<TextView>(R.id.txt_time_takeaway)
-        internal var imgDelete = binding.root.findViewById<ImageButton>(R.id.img_delete)
-        internal var imgEdit = binding.root.findViewById<ImageButton>(R.id.img_edit)
-        internal var recyclerViewItem =
-            binding.root.findViewById<RecyclerView>(R.id.recyclerviewItem_kot)
-        internal var upArrowImg =
-            binding.root.findViewById<AppCompatImageButton>(R.id.btn_arrow_kot)
-        internal var txtTime = binding.root.findViewById<TextView>(R.id.txt_time)
-    }
+    inner class ViewHolderItemKot(val binding: ItemTakeawayOrderKotListBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
-    inner class ViewHolderOrderSub(val binding: ViewBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        internal var layoutChild = binding.root.findViewById<RelativeLayout>(R.id.layoutChild)
-        internal var txtSectionName =
-            binding.root.findViewById<AppCompatTextView>(R.id.text_section_name)
-        internal var textSPInst = binding.root.findViewById<AppCompatTextView>(R.id.text_sp_inst)
-        internal var txtQty = binding.root.findViewById<AppCompatTextView>(R.id.txt_qty)
-        internal var v = binding.root.findViewById<View>(R.id.v)
-        internal var imageDeleteKotItem =
-            binding.root.findViewById<ImageView>(R.id.image_deleteKotItem)
-        internal var linerLayout = binding.root.findViewById<LinearLayout>(R.id.lin)
-    }
+    inner class ViewHolderOrderSub(val binding: ItemTakeawayOrderSubItemsListBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             Utils.CATEGORY -> {
-                val binding = ItemTakeawayOrderKotListBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
+                val binding = ItemTakeawayOrderKotListBinding.inflate(inflater, parent, false)
                 ViewHolderItemKot(binding)
             }
-
-            Utils.ITEMS -> {
-                val binding = ItemTakeawayOrderSubItemsListBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
-                ViewHolderOrderSub(binding)
-            }
-
             else -> {
-                val binding = ItemTakeawayOrderKotListBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
-                ViewHolderItemKot(binding)
+                val binding = ItemTakeawayOrderSubItemsListBinding.inflate(inflater, parent, false)
+                ViewHolderOrderSub(binding)
             }
         }
     }
@@ -102,195 +55,203 @@ class DineKOTAdapter(
     override fun getItemCount(): Int = menuList.size
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (menuList[position] is KotInstance) {
-            val row = menuList[position] as KotInstance
-            (holder as ViewHolderItemKot).textSectionTableName.text =
-                "-${row.short_name ?: "-"}"
-            holder.textOrder.text = "#${row.instance}"
-            holder.txtTime.text = Utils.getAgoTimeShort(row.kot_order_date)
-
-            if (row.soft_delete == 1) {
-                holder.layout.visibility = View.GONE
+        when (holder.itemViewType) {
+            Utils.CATEGORY -> {
+                val kotHolder = holder as ViewHolderItemKot
+                val kotInstance = menuList[position] as KotInstance
+                bindKotViewHolder(kotHolder, kotInstance, position)
             }
 
-
-            if (row.isExpanded) {
-                holder.recyclerViewItem!!.visibility = View.VISIBLE
-            } else {
-                holder.recyclerViewItem!!.visibility = View.GONE
+            Utils.ITEMS -> {
+                val itemHolder = holder as ViewHolderOrderSub
+                val itemQSR = menuList[position] as ItemQSR
+                bindItemViewHolder(itemHolder, itemQSR, position)
             }
-            holder.recyclerViewItem!!.layoutManager =
-                LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        }
+    }
 
-            if (row.item.isNotEmpty()) {
-                val adapter =
-                    DineKOTAdapter(
-                        context,
-                        isEdit,
-                        isDeleteShow,
-                        isUpdate,
-                        isDelete,
-                        row.item,
-                        database,
-                        object :
-                            DineKOTAdapter.SetOnItemClick {
-                            override fun onItemChecked(
-                                position: Int,
-                                isChecked: Boolean,
-                                orderKotId: Int
-                            ) {
-                                if (isUpdate) if (setOnItemClick != null) setOnItemClick!!.onItemChecked(
-                                    position,
-                                    isChecked,
-                                    orderKotId
-                                )
-                            }
+    private fun bindKotViewHolder(holder: ViewHolderItemKot, row: KotInstance, position: Int) {
+        with(holder.binding) {
+            textSectionTableName.text = "-${row.short_name ?: "-"}"
+            textOrder.text = "#${row.instance}"
+            txtTime.text = Utils.getAgoTimeShort(row.kot_order_date)
 
-                            override fun onPrintKOT(position: Int, kot: KotInstance) {
+            // Hide the entire card if it's soft-deleted
+            categoryParentContainerKot.visibility =
+                if (row.soft_delete == 1) View.GONE else View.VISIBLE
 
-                            }
+            // Handle expand/collapse state
+            recyclerviewItemKot.visibility = if (row.isExpanded) View.VISIBLE else View.GONE
+//            btnArrowKot.rotation = if (row.isExpanded) 180f else 0f
 
-                            override fun onKOTEdit(position: Int, orderKotId: KotInstance) {
+            // Setup inner RecyclerView
+            setupInnerRecyclerView(holder, row, position)
 
-                            }
-
-                            override fun onItemClick(position: Int, item: ItemQSR) {
-                                if (isUpdate) if (setOnItemClick != null) setOnItemClick!!.onItemClick(
-                                    position,
-                                    item
-                                )
-                            }
-
-                            override fun onKOTDelete(position: Int, orderKotId: String) {
-
-                            }
-
-                            override fun onLongPress(position: Int, orderKotId: KotInstance) {
-
-                            }
-
-                            override fun onKOTChecked(
-                                position: Int,
-                                toString: Boolean,
-                                orderKotId: KotInstance
-                            ) {
-
-                            }
-
-                            override fun onKotItemDelete(
-                                position: Int,
-                                orderKotId: Int,
-                                kot: KotInstance?
-                            ) {
-                                if (isDelete) if (setOnItemClick != null) setOnItemClick!!.onKotItemDelete(
-                                    position,
-                                    orderKotId,
-                                    row
-                                )
-                            }
-                        })
-                holder.recyclerViewItem!!.adapter = adapter
+            // Click Listener on HEADER ONLY (prevents intercept while scrolling inner RV)
+            categoryParentContainerKot.setOnClickListener {
+                row.isExpanded = !row.isExpanded
+                notifyItemChanged(position)
             }
 
-            holder.upArrowImg.setOnClickListener {
-                if (setOnItemClick != null) setOnItemClick!!.onKOTEdit(position, row)
+            btnArrowKot.setOnClickListener {
+                if (isUpdate) setOnItemClick?.onKOTEdit(position, row)
             }
-            holder.layout.setOnClickListener {
-                if (row.isExpanded) {
-                    row.isExpanded = false
-                    holder.upArrowImg.rotation = 0f
-                    holder.recyclerViewItem!!.visibility = View.GONE
-                } else {
-                    row.isExpanded = true
-                    holder.upArrowImg.rotation = 180F
-                    holder.recyclerViewItem!!.visibility = View.VISIBLE
-                }
+
+            imgDelete.setOnClickListener {
+                if (isDelete) setOnItemClick?.onKOTDelete(position, row.kot_instance_id)
             }
-            holder.imgEdit.setOnClickListener {
-                if (isUpdate) if (setOnItemClick != null) setOnItemClick!!.onKOTEdit(position, row)
-            }
-            holder.imgDelete.setOnClickListener {
-                if (isDelete) if (setOnItemClick != null) setOnItemClick!!.onKOTDelete(
-                    position,
-                    row.kot_instance_id
-                )
-            }
-            holder.layout.setOnLongClickListener {
-                if (isUpdate) if (setOnItemClick != null) setOnItemClick!!.onLongPress(
-                    position,
-                    row
-                )
+
+            categoryParentContainerKot.setOnLongClickListener {
+                if (isUpdate) setOnItemClick?.onLongPress(position, row)
                 true
             }
-        } else if (menuList[position] is ItemQSR) {
-            val row = menuList[position] as ItemQSR
-            row.item_name = row.item_name.uppercase(Locale.US)
-            (holder as ViewHolderOrderSub).txtSectionName.text = row.item_name
-            holder.txtQty!!.text = "x${row.qty}"
-            // 1. Get the service time.
-            val serviceTime = database.getDeliveryTimeById(row.item_id) ?: 15
+        }
+    }
 
-            // 2. Use the updated helper function. It now correctly handles the `created_at` string.
-            val (status, duration) = Utils.determineItemStatus(row, serviceTime)
-            if (row.isd != 0) {
-                holder.imageDeleteKotItem.setImageResource(R.drawable.ic_check_circle)
-            } else if (status == ItemServingStatus.WITHIN_SERVICE_TIME) {
-                holder.imageDeleteKotItem.setImageResource(R.drawable.ic_wthin_time)
-            } else if (status == ItemServingStatus.BEYOND_SERVICE_TIME) {
-                holder.imageDeleteKotItem.setImageResource(R.drawable.ic_service_time)
-            }
+    private fun setupInnerRecyclerView(
+        holder: ViewHolderItemKot,
+        row: KotInstance,
+        parentPosition: Int
+    ) {
+        val innerRecyclerView = holder.binding.recyclerviewItemKot
+        with(innerRecyclerView) {
+            layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
 
-            if (row.soft_delete == 1) {
-                holder.linerLayout.visibility = View.GONE
-            }
-            if (row.sp_inst != null && row.sp_inst != "" && row.sp_inst != "[\"\"]") {
-                holder.textSPInst.visibility = View.VISIBLE
-                try {
-                    val items = JSONArray(row.sp_inst)
-                    var inst = ""
-                    for (i in 0 until items.length()) {
-                        inst += items.getString(i) + ","
+            // isNestedScrollingEnabled should be false when using requestDisallowInterceptTouchEvent
+            // as they are two different ways of handling the same problem. The latter is more reliable.
+            isNestedScrollingEnabled = false
+
+            if (row.item.isNotEmpty()) {
+                val adapter = DineKOTAdapter(
+                    context, isEdit, isDeleteShow, isUpdate, isDelete, row.item, database,
+                    object : SetOnItemClick {
+                        override fun onItemChecked(pos: Int, isChecked: Boolean, orderKotId: Int) {
+                            if (isUpdate) setOnItemClick?.onItemChecked(pos, isChecked, orderKotId)
+                        }
+
+                        override fun onItemClick(pos: Int, item: ItemQSR) {
+                            if (isUpdate) setOnItemClick?.onItemClick(pos, item)
+                        }
+
+                        override fun onKotItemDelete(pos: Int, orderKotId: Int, kot: KotInstance?) {
+                            if (isDelete) setOnItemClick?.onKotItemDelete(pos, orderKotId, row)
+                        }
+
+                        override fun onPrintKOT(pos: Int, kot: KotInstance) {}
+                        override fun onKOTEdit(pos: Int, kot: KotInstance) {
+                            if (isUpdate) setOnItemClick?.onKOTEdit(pos, kot)
+                        }
+                        override fun onKOTDelete(pos: Int, instanceId: String) {}
+                        override fun onLongPress(pos: Int, kot: KotInstance) {}
+                        override fun onKOTChecked(pos: Int, isChecked: Boolean, kot: KotInstance) {}
                     }
-                    if (inst.isNotEmpty()) {
-                        inst = inst.substring(0, inst.length - 1)
+                )
+                this.adapter = adapter
+
+                // If we have our custom MaxHeightRecyclerView, set the cap programmatically
+             /*   if (this is MaxHeightRecyclerView) {
+                    val itemHeight = context.resources.getDimensionPixelSize(R.dimen.kot_sub_item_height)
+                    (this as MaxHeightRecyclerView).setMaxHeightPx(itemHeight * 4)
+                }*/
+
+                // *** THIS IS THE FIX FOR THE SCROLLING ISSUE ***
+                val touchListener = View.OnTouchListener { view, motionEvent ->
+                    when (motionEvent.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            // When the user first touches the inner RecyclerView,
+                            // tell the parent RecyclerView to stop intercepting touch events.
+                            view.parent.requestDisallowInterceptTouchEvent(true)
+                        }
+                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                            // When the user lifts their finger,
+                            // allow the parent to intercept again.
+                            view.parent.requestDisallowInterceptTouchEvent(false)
+                        }
                     }
-                    holder.textSPInst.text = inst
-                } catch (e: JSONException) {
-                    holder.textSPInst.text = row.sp_inst
-                    e.printStackTrace()
+                    // Let the inner RecyclerView handle the touch event.
+                    // Returning 'false' means we haven't consumed the event.
+                    false
                 }
+                setOnTouchListener(touchListener)
+
             } else {
-                holder.textSPInst.visibility = View.GONE
+                layoutParams = layoutParams?.apply {
+                    height = ViewGroup.LayoutParams.WRAP_CONTENT
+                }
             }
+        }
+    }
 
-            if (position < menuList.size - 1) {
-                holder.v.visibility = View.VISIBLE
+
+    private fun bindItemViewHolder(holder: ViewHolderOrderSub, row: ItemQSR, position: Int) {
+        with(holder.binding) {
+            // Hide if soft deleted
+            root.visibility = if (row.soft_delete == 1) View.GONE else View.VISIBLE
+            if (row.soft_delete == 1) return
+
+            textSectionName.text = row.item_name.uppercase(Locale.getDefault())
+            txtQty.text = "x${row.qty}"
+
+            // Status Icon Logic
+            val serviceTime = database.getDeliveryTimeById(row.item_id) ?: 15
+            val (status, _) = Utils.determineItemStatus(row, serviceTime)
+
+            val statusIconRes = when {
+                row.isd != 0 -> R.drawable.ic_check_circle
+                status == ItemServingStatus.WITHIN_SERVICE_TIME -> R.drawable.ic_wthin_time
+                status == ItemServingStatus.BEYOND_SERVICE_TIME -> R.drawable.ic_service_time
+                else -> R.drawable.ic_wthin_time
+            }
+            imageDeleteKotItem.setImageResource(statusIconRes)
+
+            // Special Instructions
+            val instructions = parseInstructions(row.sp_inst)
+            if (instructions.isNotEmpty()) {
+                textSpInst.visibility = View.VISIBLE
+                textSpInst.text = instructions
             } else {
-                holder.v.visibility = View.GONE
+                textSpInst.visibility = View.GONE
             }
 
-            holder.imageDeleteKotItem?.setOnClickListener {
-                if (setOnItemClick != null) setOnItemClick!!.onKotItemDelete(position, row.id, null)
+            // Divider visibility for all but the last item
+            v.visibility = if (position < menuList.size - 1) View.VISIBLE else View.GONE
+
+            // --- Click Listeners ---
+            imageDeleteKotItem.setOnClickListener {
+                setOnItemClick?.onKotItemDelete(position, row.id, null)
             }
 
-            holder.layoutChild.setOnClickListener {
-                if (setOnItemClick != null) setOnItemClick!!.onItemClick(position, row)
+            layoutChild.setOnClickListener {
+                setOnItemClick?.onItemClick(position, row)
             }
+        }
+    }
+
+    private fun parseInstructions(spInstJson: String?): String {
+        if (spInstJson.isNullOrBlank() || spInstJson == "[\"\"]") {
+            return ""
+        }
+        return try {
+            val items = JSONArray(spInstJson)
+            (0 until items.length())
+                .map { items.getString(it) }
+                .filter { it.isNotBlank() }
+                .joinToString(separator = ", ")
+        } catch (e: JSONException) {
+            spInstJson // Return original string if it's not valid JSON
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (menuList[position] is KotInstance) {
-            Utils.CATEGORY
-        } else if (menuList[position] is ItemQSR) {
-            Utils.ITEMS
-        } else {
-            Utils.CATEGORY
+        return when (menuList[position]) {
+            is KotInstance -> Utils.CATEGORY
+            is ItemQSR -> Utils.ITEMS
+            else -> throw IllegalArgumentException("Unsupported type at position $position")
         }
     }
 
-    fun SetOnItemClickListner(setOnItemClick: SetOnItemClick?) {
-        this.setOnItemClick = setOnItemClick
+    fun setOnItemClickListener(listener: SetOnItemClick?) {
+        this.setOnItemClick = listener
     }
 
     interface SetOnItemClick {

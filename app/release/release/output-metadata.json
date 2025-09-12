@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 56,
-      "versionName": "1.0.53-cj",
+      "versionCode": 61,
+      "versionName": "1.0.58-cj",
       "outputFile": "app-release.apk"
     }
   ],

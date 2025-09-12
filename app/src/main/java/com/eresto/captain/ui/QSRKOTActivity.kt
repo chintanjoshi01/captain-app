@@ -30,6 +30,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.core.widget.addTextChangedListener
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.eresto.captain.R
 import com.eresto.captain.adapter.DineKOTAdapter
 import com.eresto.captain.base.BaseActivity
@@ -167,7 +168,15 @@ class QSRKOTActivity : BaseActivity() {
 
         tableId = intent.getIntExtra("table_id", 0)
         val spanCount = resources.getInteger(R.integer.kot_grid_columns)
-        binding!!.rvPendingKot.layoutManager = GridLayoutManager(this, spanCount)
+        val layoutManager = if (resources.getBoolean(R.bool.isTablet)) {
+            StaggeredGridLayoutManager(
+                spanCount,  // number of columns
+                StaggeredGridLayoutManager.VERTICAL
+            )
+        } else {
+            GridLayoutManager(this, spanCount)
+        }
+        binding!!.rvPendingKot.layoutManager = layoutManager
 
         handlePendingKotResponse(
             gson.fromJson(
