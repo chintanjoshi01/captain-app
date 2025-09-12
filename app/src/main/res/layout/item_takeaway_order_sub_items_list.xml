@@ -10,47 +10,50 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/color_white"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="@dimen/_5sdp">
-
-        <ImageView
-            android:id="@+id/image_deleteKotItem"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_delete"
-            android:visibility="gone"
-            app:tint="@color/colorSecondary_70" />
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/lin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toStartOf="@+id/txt_qty"
-            android:layout_toEndOf="@+id/image_deleteKotItem"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_section_name"
+            <ImageView
+                android:id="@+id/image_deleteKotItem"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:padding="@dimen/_1sdp"
+                android:visibility="visible"
+                app:srcCompat="@drawable/ic_check_circle" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_2sdp"
-                android:layout_marginEnd="@dimen/_3sdp"
-                android:drawablePadding="@dimen/_8sdp"
-                android:fontFamily="@font/nunito_semibold"
-                android:lines="1"
-                android:padding="@dimen/_2sdp"
-                android:textColor="@color/colorSecondary"
-                android:textSize="@dimen/_12sdp" />
+                android:orientation="vertical">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_sp_inst"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_2sdp"
-                android:fontFamily="@font/nunito_regular"
-                android:textColor="@color/colorSecondaryVariant"
-                android:textSize="@dimen/_9sdp" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_section_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_semibold"
+                    android:lines="1"
+                    android:text="ITEMS "
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="@dimen/kot_item_name_size" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_sp_inst"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_regular"
+                    android:text="SP IN"
+                    android:textColor="@color/colorSecondaryVariant"
+                    android:textSize="@dimen/kot_item_details_size" />
+            </LinearLayout>
+
+
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -66,7 +69,6 @@
             android:id="@+id/v"
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
-            android:layout_marginTop="@dimen/_4sdp"
             android:layout_below="@+id/lin"
             android:alpha="0.5"
             android:background="@color/colorSecondary" />

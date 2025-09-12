@@ -9,11 +9,11 @@
         android:id="@+id/category_parent_container_kot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_2sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginBottom="@dimen/_4sdp"
-        app:cardCornerRadius="@dimen/_5sdp"
+        android:layout_marginStart="@dimen/card_margin"
+        android:layout_marginTop="@dimen/card_margin"
+        android:layout_marginEnd="@dimen/card_margin"
+        android:layout_marginBottom="@dimen/card_margin"
+        app:cardCornerRadius="@dimen/card_corner_radius"
         app:cardElevation="1dp"
         app:strokeColor="@color/color_black"
         app:strokeWidth="1dp">
@@ -47,7 +47,7 @@
                     android:paddingBottom="@dimen/_2sdp"
                     android:text="#1"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="@dimen/_12sdp"
+                    android:textSize="@dimen/kot_card_time_size"
                     android:textStyle="bold" />
 
                 <androidx.appcompat.widget.AppCompatTextView
@@ -60,7 +60,7 @@
                     android:fontFamily="@font/nunito_bold"
                     android:text="GF AC - T2 #1 AR"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="@dimen/_12sdp"
+                    android:textSize="@dimen/kot_card_time_size"
                     android:textStyle="normal" />
 
                 <TextView
@@ -82,10 +82,11 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:tint="@color/colorPrimary"
                     android:background="@android:color/transparent"
                     android:padding="@dimen/_5sdp"
-                    app:srcCompat="@drawable/ic_print" />
+                    android:visibility="visible"
+                    app:srcCompat="@drawable/ic_edit"
+                    app:tint="@color/colorPrimary" />
 
             </RelativeLayout>
 
@@ -117,7 +118,7 @@
             android:gravity="center_vertical"
             android:padding="@dimen/_4sdp"
             android:textColor="@color/colorSecondary"
-            android:textSize="@dimen/_12sdp"
+            android:textSize="@dimen/kot_card_time_size"
             app:drawableStartCompat="@drawable/ic_clock_pending_order"
             app:drawableTint="@color/colorSecondaryVariant" />
 

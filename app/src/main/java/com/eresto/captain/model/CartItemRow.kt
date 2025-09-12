@@ -17,5 +17,7 @@ data class CartItemRow(
     var item_tax: String?,
     var item_tax_amt: String,
     var item_amt: String,
-    var sorting: Int
+    var sorting: Int,
+    var softDelete: Int,
+    var isEdit: Int = 0
 )

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/dialog_status_padding">
+
+    <!-- Header Section -->
+    <TextView
+        android:id="@+id/tv_item_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="@font/nunito_bold"
+        android:textColor="@color/colorSecondary"
+        android:textSize="@dimen/dialog_status_item_name_text_size"
+        app:layout_constraintEnd_toStartOf="@+id/btn_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Paneer Butter Masala Special" />
+
+    <TextView
+        android:id="@+id/tv_quantity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/nunito_regular"
+        android:textColor="@color/colorSecondary"
+        android:textSize="@dimen/dialog_status_quantity_text_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_item_name"
+        tools:text="x2" />
+
+    <ImageButton
+        android:id="@+id/btn_close"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/close"
+        android:src="@drawable/ic_close_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/colorSecondary" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_quantity" />
+
+
+    <!-- Status Line -->
+    <ImageView
+        android:id="@+id/iv_status_icon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="@dimen/dialog_status_padding"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        tools:src="@drawable/ic_check_circle" />
+
+    <TextView
+        android:id="@+id/tv_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:fontFamily="@font/nunito_semibold"
+        android:textSize="@dimen/dialog_status_status_text_size"
+        app:layout_constraintBottom_toBottomOf="@id/iv_status_icon"
+        app:layout_constraintStart_toEndOf="@id/iv_status_icon"
+        app:layout_constraintTop_toTopOf="@id/iv_status_icon"
+        tools:text="Delivered"
+        tools:textColor="@color/color_green_running_border" />
+
+    <!-- Special Instructions -->
+    <TextView
+        android:id="@+id/label_special_instructions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dialog_status_padding_large"
+        android:fontFamily="@font/nunito_regular"
+        android:text="@string/special_instructions"
+        android:textColor="@color/blackText1"
+        android:textSize="@dimen/dialog_status_label_text_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_status_icon" />
+
+    <TextView
+        android:id="@+id/tv_instructions_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/shape_grey_border_white"
+        android:backgroundTint="@color/info_card_background"
+        android:fontFamily="@font/nunito_semibold"
+        android:padding="@dimen/dialog_status_info_card_padding"
+        android:textColor="@color/colorSecondary"
+        android:textSize="@dimen/dialog_status_content_text_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_special_instructions"
+        tools:text="Extra Spicy, Less Oil, Jain Style Preparation" />
+
+    <!-- Info Cards -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_service_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dialog_status_padding_large"
+        android:layout_marginEnd="12dp"
+        app:cardBackgroundColor="@color/info_card_background"
+        app:cardCornerRadius="@dimen/dialog_status_info_card_corner_radius"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toStartOf="@+id/card_duration"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_instructions_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dialog_status_info_card_padding">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_stop_watch"
+                app:tint="@color/colorSecondaryVariant" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_regular"
+                    android:text="@string/service_time"
+                    android:textSize="@dimen/dialog_status_info_card_title_size" />
+
+                <TextView
+                    android:id="@+id/tv_service_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_bold"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="@dimen/dialog_status_info_card_value_size"
+                    tools:text="15 Min" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_duration"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="12dp"
+        app:cardBackgroundColor="@color/info_card_background"
+        app:cardCornerRadius="@dimen/dialog_status_info_card_corner_radius"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/card_service_time"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/card_service_time"
+        app:layout_constraintTop_toTopOf="@id/card_service_time">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dialog_status_info_card_padding">
+
+            <ImageView
+                android:id="@+id/iv_duration_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_send_clock"
+                tools:tint="@color/color_green_running_border" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_regular"
+                    android:text="@string/duration"
+                    android:textSize="@dimen/dialog_status_info_card_title_size" />
+
+                <TextView
+                    android:id="@+id/tv_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_bold"
+                    android:textSize="@dimen/dialog_status_info_card_value_size"
+                    tools:text="8 Min"
+                    tools:textColor="@color/color_green_running_border" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

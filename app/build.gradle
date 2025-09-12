@@ -14,9 +14,9 @@ android {
     defaultConfig {
         applicationId "com.eresto.captain"
         minSdk 21
-        targetSdk 34
-        versionCode 30
-        versionName "1.0.29"
+        targetSdk 35
+        versionCode 56
+        versionName "1.0.53"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -89,5 +89,8 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
     implementation 'com.github.yuriy-budiyev:code-scanner:2.3.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.8.0'
+    // ZXING for QR Code Scanning
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
 
 }

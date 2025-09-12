@@ -1,5 +1,7 @@
 package com.eresto.captain.model
 
+import com.google.gson.annotations.SerializedName
+
 data class GetOrderQSR(
     val `data`: QSRData,
     val message: String,
@@ -51,29 +53,30 @@ data class OrderQSR(
     var price: Float,
     var user_id: Int,
     var newItem: List<CartItemRow>?,
-    var all_item_list : ArrayList<ItemQSR>
-){
+    var all_item_list: ArrayList<ItemQSR>,
+    var item_id: Int,
+) {
     constructor() : this(
-    "",
-    "",
-    "",
-    "",
-    0f,0,0,
-    "",
-    0,0,0,
-    "",
-    arrayListOf(),
-    0,
-    "",
-    0,
-    "",
-    0,0,
-    "",0,
-    "",
-    "",0,0,0,0,
-    "",0,0,
-    "",
-    "",0f,0, emptyList(),ArrayList<ItemQSR>()
+        "",
+        "",
+        "",
+        "",
+        0f, 0, 0,
+        "",
+        0, 0, 0,
+        "",
+        arrayListOf(),
+        0,
+        "",
+        0,
+        "",
+        0, 0,
+        "", 0,
+        "",
+        "", 0, 0, 0, 0,
+        "", 0, 0,
+        "",
+        "", 0f, 0, emptyList(), ArrayList<ItemQSR>(), 0
     )
 }
 
@@ -87,7 +90,8 @@ data class KotInstance(
     var isExpanded: Boolean = true,
     val short_name: String?,
     var soft_delete: Int,
-    var kitchenName: String?
+    var kitchenName: String?,
+    var kot_id: Int? = 0
 )
 
 
@@ -96,6 +100,7 @@ data class ItemQSR(
     val item_id: Int,
     var item_name: String,
     val order_date: String,
+    @SerializedName("item_price")
     var price: Double,
     var qty: Int,
     val short_name: String?,
@@ -107,7 +112,10 @@ data class ItemQSR(
     var kot_ncv: Int,
     var item_tax: String?,
     var item_tax_amt: String,
-    var item_amt: String
+    var item_amt: String,
+    var isd: Int = 0,
+    var dtd: Int = 0,
+    var created_at: String = "",
 )
 
 data class ItemQSRs(
@@ -161,7 +169,8 @@ data class OrderQSRs(
     var table_name: String,
     val updated_at: String,
     var price: Float,
-    val user_id: Int)
+    val user_id: Int
+)
 
 data class Orders(
     val order: OrderInstanceData,
@@ -193,11 +202,11 @@ data class OrderInstanceData(
     val sp_inst: String,
     val is_delivered: Int,
     val short_name: String,
-    var cust_name:String,
-    var cust_mobile:String,
-    var no_of_persons:Int,
-    var kitchen_cat_id:Int,
-    var ncv:Int
+    var cust_name: String,
+    var cust_mobile: String,
+    var no_of_persons: Int,
+    var kitchen_cat_id: Int,
+    var ncv: Int
 )
 
 data class SubmitNewOrderKOT(

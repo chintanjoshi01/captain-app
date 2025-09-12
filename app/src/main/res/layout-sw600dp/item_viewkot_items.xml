@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/view_kot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_item_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Item Name"
+            android:drawablePadding="@dimen/_2sdp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:drawableLeft="@drawable/ic_symbol_veg"
+            android:textColor="@color/colorSecondary"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- Item Price (Visible by default) -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_item_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:text="₹ 120"
+        android:textColor="@color/colorSecondary"
+        android:textSize="16sp"
+        android:visibility="visible" />
+
+    <!-- Quantity Counter (Initially hidden) -->
+    <LinearLayout
+        android:id="@+id/ll_counter_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone"> <!-- Initially GONE -->
+
+        <ImageView
+            android:id="@+id/lin_min"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_quantity_button"
+            android:padding="8dp"
+            android:src="@drawable/ic_minus_sign" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txt_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:gravity="center"
+            android:minWidth="24dp"
+            android:text="1"
+            android:textColor="@color/colorSecondary"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/lin_add"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_quantity_button"
+            android:padding="8dp"
+            android:src="@drawable/ic_add" />
+    </LinearLayout>
+
+</RelativeLayout>

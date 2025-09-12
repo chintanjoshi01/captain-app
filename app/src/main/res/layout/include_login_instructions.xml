@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <!-- Instruction Item 1 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
+        <TextView
+            android:layout_width="@dimen/login_instruction_number_width"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/nunito_regular"
+            android:gravity="center"
+            android:text="1."
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/login_instruction_text_size"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/login_instruction_text_margin_start"
+            android:fontFamily="@font/nunito_regular"
+            android:text="Open Eresto Edge"
+            android:textColor="@color/blackText1"
+            android:textSize="@dimen/login_instruction_text_size" />
+    </LinearLayout>
+
+    <!-- Instruction Item 2 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
+        <TextView
+            android:layout_width="@dimen/login_instruction_number_width"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/nunito_regular"
+            android:gravity="center"
+            android:text="2."
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/login_instruction_text_size"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/login_instruction_text_margin_start"
+            android:fontFamily="@font/nunito_regular"
+            android:text="Select the Captain User."
+            android:textColor="@color/blackText1"
+            android:textSize="@dimen/login_instruction_text_size" />
+    </LinearLayout>
+
+    <!-- Instruction Item 3 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
+        <TextView
+            android:layout_width="@dimen/login_instruction_number_width"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/nunito_regular"
+            android:gravity="center"
+            android:text="3."
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/login_instruction_text_size"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/login_instruction_text_margin_start"
+            android:fontFamily="@font/nunito_regular"
+            android:text="It will show a QR Code"
+            android:textColor="@color/blackText1"
+            android:textSize="@dimen/login_instruction_text_size" />
+    </LinearLayout>
+
+    <!-- Instruction Item 4 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
+        <TextView
+            android:layout_width="@dimen/login_instruction_number_width"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/nunito_regular"
+            android:gravity="center"
+            android:text="4."
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/login_instruction_text_size"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tvStep3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/login_instruction_text_margin_start"
+            android:fontFamily="@font/nunito_regular"
+            android:text="@string/step_3"
+            android:textColor="@color/blackText1"
+            android:textSize="@dimen/login_instruction_text_size" />
+    </LinearLayout>
+
+    <!-- Subtext, properly aligned -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/login_instruction_subtext_margin_start"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/nunito_regular"
+        android:text="(It will open the camera, Scan the QR Code to Login)"
+        android:textColor="@color/blackText2"
+        android:textSize="@dimen/login_instruction_subtext_size" />
+
+</merge>

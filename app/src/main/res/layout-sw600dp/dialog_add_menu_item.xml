@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_modal_rounded"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- HEADER -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_item_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/btn_back"
+                android:padding="@dimen/dialog_padding_medium"
+                android:text="@string/item_name"
+                android:textColor="@color/color_white"
+                android:textSize="@dimen/dialog_header_text_size"
+                app:fontFamily="@font/nunito_bold" />
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:padding="@dimen/dialog_padding_medium"
+                android:src="@drawable/ic_close_icon"
+                app:tint="@color/color_white" />
+        </RelativeLayout>
+
+        <!-- QUANTITY AND PRICE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dialog_margin_small"
+            android:background="@drawable/layout_bg_gray"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:id="@+id/lin_min"
+                    android:layout_width="@dimen/dialog_qty_button_size"
+                    android:layout_height="@dimen/dialog_qty_button_size"
+                    android:background="@drawable/layout_border_fill_square_corner_5dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="@dimen/dialog_qty_icon_size"
+                        android:layout_height="@dimen/dialog_qty_icon_size"
+                        app:srcCompat="@drawable/ic_minus_sign"
+                        app:tint="@color/colorPrimary" />
+                </LinearLayout>
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/tv_qty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@color/transparent"
+                    android:editable="false"
+                    android:gravity="center"
+                    android:hint="@string/qty"
+                    android:inputType="number"
+                    android:text="1"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="@dimen/dialog_qty_text_size"
+                    app:fontFamily="@font/nunito_semibold" />
+
+                <LinearLayout
+                    android:id="@+id/lin_add"
+                    android:layout_width="@dimen/dialog_qty_button_size"
+                    android:layout_height="@dimen/dialog_qty_button_size"
+                    android:background="@drawable/layout_border_fill_square_corner_5dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="@dimen/dialog_qty_icon_size"
+                        android:layout_height="@dimen/dialog_qty_icon_size"
+                        app:srcCompat="@drawable/ic_add"
+                        app:tint="@color/colorPrimary" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dialog_element_spacing"
+                android:background="@drawable/shape_grey_border_white"
+                android:gravity="end">
+                <!-- Currency symbol can be set from code -->
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/tv_item_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/transparent"
+                    android:padding="8dp"
+                    android:text="140"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="@dimen/dialog_price_text_size"
+                    app:fontFamily="@font/nunito_regular" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- SPECIAL INSTRUCTIONS -->
+        <TextView
+            android:id="@+id/txt_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dialog_padding_medium"
+            android:text="@string/special_instruction"
+            android:textColor="@color/blackText1"
+            android:textSize="@dimen/dialog_instruction_title_size"
+            app:fontFamily="@font/nunito_regular" />
+
+        <RelativeLayout
+            android:id="@+id/rel_sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dialog_margin_small"
+            android:background="@drawable/layout_bg_white"
+            android:padding="4dp">
+
+            <EditText
+                android:id="@+id/edt_special_inst"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/btn_add_inst"
+                android:background="@android:color/transparent"
+                android:hint="@string/enter_special_instruction"
+                android:paddingStart="@dimen/dialog_padding_medium"
+                android:paddingEnd="@dimen/dialog_padding_medium"
+                android:textColor="@color/colorSecondary"
+                android:textSize="@dimen/dialog_instruction_input_size"
+                app:fontFamily="@font/nunito_regular" />
+
+            <ImageView
+                android:id="@+id/btn_add_inst"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/shape_grey"
+                android:backgroundTint="@color/colorSecondaryVariant_light1"
+                android:padding="@dimen/dialog_margin_small"
+                android:src="@drawable/ic_plus_white"
+                app:tint="@color/colorSecondary" />
+        </RelativeLayout>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chips"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dialog_margin_small"
+            android:layout_marginEnd="@dimen/dialog_margin_small"
+            android:layout_marginBottom="@dimen/dialog_margin_small" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_100sdp"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:textColorHint="@color/colorSecondary_70"
+            android:theme="@style/MyCustomTextInputStyle"
+            android:visibility="gone"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tv_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="top"
+                android:hint="@string/special_instruction"
+                android:imeOptions="actionDone"
+                android:inputType="textPersonName"
+                android:textColor="@color/colorSecondary"
+                android:theme="@style/textInput" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <!-- NCV BUTTONS -->
+        <LinearLayout
+            android:id="@+id/layoutNCV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dialog_margin_small">
+
+            <LinearLayout
+                android:id="@+id/lin_order_ncv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_complimentary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_border_fill_square_corner_5dp"
+                    android:text="@string/complimentary"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="@dimen/dialog_ncv_button_text_size"
+                    app:fontFamily="@font/nunito_semibold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_void"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_border_fill_square_corner_5dp_without_stroke"
+                    android:text="@string/lbl_void"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="@dimen/dialog_ncv_button_text_size"
+                    app:fontFamily="@font/nunito_semibold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- BOTTOM ACTIONS -->
+    <View
+        android:id="@+id/dividerBottom"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/dialog_element_spacing"
+        android:background="@drawable/toolbar_dropshadow" />
+
+    <LinearLayout
+        android:id="@+id/action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_padding_large"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dialog_action_button_margin_vertical"
+            android:layout_marginEnd="@dimen/dialog_padding_medium"
+            android:layout_marginBottom="@dimen/dialog_action_button_margin_vertical"
+            android:layout_weight="1"
+            android:background="@drawable/shape_gray_border_round"
+            android:text="@string/cancel_caps"
+            android:textAllCaps="false"
+            android:textColor="@color/blackText1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_add"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dialog_action_button_margin_vertical"
+            android:layout_marginBottom="@dimen/dialog_action_button_margin_vertical"
+            android:layout_weight="1"
+            android:background="@drawable/shape_red_fill_round"
+            android:text="@string/update"
+            android:textAllCaps="false"
+            android:textColor="@color/color_white" />
+    </LinearLayout>
+</LinearLayout>

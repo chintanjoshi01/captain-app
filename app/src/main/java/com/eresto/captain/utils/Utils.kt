@@ -13,7 +13,9 @@ import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -24,6 +26,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,6 +35,8 @@ import com.eresto.captain.R
 import com.eresto.captain.adapter.SelectPrinterAdapter
 import com.eresto.captain.model.DataInvoice
 import com.eresto.captain.model.InvoiceKot
+import com.eresto.captain.model.ItemQSR
+import com.eresto.captain.model.ItemQSRs
 import com.eresto.captain.model.KotInstance
 import com.eresto.captain.model.Orders
 import com.eresto.captain.model.PrinterRespo
@@ -41,8 +46,14 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import org.json.JSONArray
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.Date
+import java.util.Locale
 import java.util.Objects
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -146,7 +157,8 @@ class Utils {
             val arrStr = ArrayList<String>()
 
             if (text.isNotEmpty()) {
-                arrStr.addAll(text.split(",").map { it.trim() }.filter { it.isNotBlank() }) // Proper split and trim
+                arrStr.addAll(text.split(",").map { it.trim() }
+                    .filter { it.isNotBlank() }) // Proper split and trim
             }
 
             for (i in 0 until chips.childCount) {
@@ -229,39 +241,46 @@ class Utils {
             dialog.show()
         }
 
-        fun getAgoTimeShort(time: String): String {
+        fun getAgoTimeShort(time: String?): String {
             Log.e("dladajla", "kot_order_date :: $time")
-            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            val format2 = SimpleDateFormat("yyyy-MM-dd")
-            val formatDisplay = SimpleDateFormat("dd-MM-yy")
-            try {
-                val past = format.parse(time) //"2016.02.05 AD at 23:59:30"
+
+            if (time.isNullOrBlank()) {
+                return "" // or "N/A"
+            }
+
+            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val format2 = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val formatDisplay = SimpleDateFormat("dd-MM-yy", Locale.getDefault())
+
+            return try {
+                // First format
+                val past = format.parse(time)
                 val now = Date()
-                val seconds: Long = TimeUnit.MILLISECONDS.toSeconds(now.time - past.time)
-                val minutes: Long = TimeUnit.MILLISECONDS.toMinutes(now.time - past.time)
-                val hours: Long = TimeUnit.MILLISECONDS.toHours(now.time - past.time)
-                val days: Long = TimeUnit.MILLISECONDS.toDays(now.time - past.time)
-                return if (seconds < 60) {
-                    ("$seconds sec")
-                } else if (minutes < 60) {
-                    ("$minutes min")
-                } else if (hours < 24) {
-                    ("$hours hr ${minutes % 60 + 1} min")
-                } else {
-                    ("$days days")
+
+                val seconds = TimeUnit.MILLISECONDS.toSeconds(now.time - past.time)
+                val minutes = TimeUnit.MILLISECONDS.toMinutes(now.time - past.time)
+                val hours = TimeUnit.MILLISECONDS.toHours(now.time - past.time)
+                val days = TimeUnit.MILLISECONDS.toDays(now.time - past.time)
+
+                when {
+                    seconds < 60 -> "$seconds sec"
+                    minutes < 60 -> "$minutes min"
+                    hours < 24 -> "$hours hr ${minutes % 60 + 1} min"
+                    else -> "$days days"
                 }
             } catch (j: Exception) {
-                Log.e("jlfsjfs", "kot_order_date catch ::  :: $time")
-                val past = format2.parse(time) //"2016.02.05 AD at 23:59:30"
-                val now = Date()
-                val seconds: Long = TimeUnit.MILLISECONDS.toSeconds(now.time - past.time)
-                val minutes: Long = TimeUnit.MILLISECONDS.toMinutes(now.time - past.time)
-                val hours: Long = TimeUnit.MILLISECONDS.toHours(now.time - past.time)
-                val days: Long = TimeUnit.MILLISECONDS.toDays(now.time - past.time)
-                return formatDisplay.format(past)
-                j.printStackTrace()
+                try {
+                    // Second format (ISO UTC)
+                    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                    sdf.timeZone = TimeZone.getTimeZone("UTC")
+
+                    val past = sdf.parse(time)
+                    formatDisplay.format(past) // e.g. "21-08-25"
+                } catch (e: Exception) {
+                    Log.e("jlfsjfs", "kot_order_date final catch :: $time")
+                    "" // fallback if nothing works
+                }
             }
-            return time
         }
 
         fun getIMEI(context: Context): String {
@@ -535,12 +554,14 @@ class Utils {
             chips.removeAllViews() // Clear existing chips before adding new ones
 
             val itemsSet = HashSet<String>() // Use a HashSet to track added items
-            if (!sp.isNullOrEmpty() && sp != "[]" && sp != "null") {
+            if (!sp.isNullOrBlank() && sp != "[]" && sp != "null" && sp != "[\"\"]") {
                 try {
-                    val cleanedSp = sp.replace("null,", "").replace(",null", "").replace("[", "").replace("]", "")
+                    val cleanedSp = sp.replace("null,", "").replace(",null", "").replace("[", "")
+                        .replace("]", "")
                     val items = JSONArray("[$cleanedSp]") // Ensure valid JSON format
 
-                    txtTitle.text = activity.resources.getString(R.string.select_special_instruction)
+                    txtTitle.text =
+                        activity.resources.getString(R.string.select_special_instruction)
 
                     for (i in 0 until items.length()) {
                         val str = items.getString(i).trim()
@@ -570,8 +591,96 @@ class Utils {
             }
         }
 
+        fun addChipsRounded(
+            activity: Activity,
+            sp: String?,
+            notesList: List<String?>?,
+            chips: ChipGroup,
+            txtTitle: AppCompatTextView,
+            listener: CompoundButton.OnCheckedChangeListener,
+        ) {
+            // Helper function to parse JSON arrays safely
+            fun parseJsonArray(input: String): List<String> {
+                return try {
+                    JSONArray(input).let { jsonArray ->
+                        List(jsonArray.length()) { jsonArray.getString(it).trim() }
+                    }
+                } catch (e: Exception) {
+                    Log.e("addChips", "Error parsing JSON array: $input, $e")
+                    emptyList()
+                }
+            }
+
+            // Process notesList to handle both JSON arrays and plain strings
+            val notes = notesList?.flatMap { note ->
+                when {
+                    note.isNullOrBlank() -> emptyList()
+                    note.startsWith("[") && note.endsWith("]") -> parseJsonArray(note) // Handle JSON arrays
+                    else -> listOf(
+                        note.replace("\\/", "/")
+                            .replace("[", "")
+                            .replace("]", "")
+                            .replace("\"", "")
+                    ) // Treat as plain string
+                }
+            }?.distinctBy { it.lowercase() } ?: emptyList()
+
+            // Process sp (special instructions) similarly
+            val spItems = sp?.let {
+                try {
+                    JSONArray(it).let { jsonArray ->
+                        List(jsonArray.length()) { jsonArray.getString(it).trim() }
+                    }
+                } catch (e: Exception) {
+                    Log.e("addChips", "Error parsing sp: $sp, $e")
+                    sp.split(",").map { it.trim() }
+                }
+            }?.filter { it.isNotEmpty() && it != "null" }?.distinctBy { it.lowercase() }
+                ?: emptyList()
+
+            Log.e("addChips", "Processed Notes: $notes")
+            Log.e("addChips", "Processed Special Instructions: $spItems")
+
+            // Set the title
+            txtTitle.text = activity.resources.getString(R.string.select_special_instruction)
+
+            // Combine, filter, and remove duplicates (case-insensitive)
+            val uniqueItems = (notes + spItems).distinctBy { it.lowercase() }
+
+            // Clear existing chips before adding new ones
+            chips.removeAllViews()
+
+            uniqueItems.forEach { str ->
+                val chip = LayoutInflater.from(
+                    ContextThemeWrapper(activity, R.style.Widget_App_Chip_Round_New)
+                ).inflate(
+                    R.layout.item_chip_choice_round,
+                    chips,
+                    false
+                ) as Chip
+                chip.apply {
+                    text = str
+                    isCheckedIconVisible = false
+                    isCheckable = true
+                    isChecked = false
+                    setOnCheckedChangeListener(listener)
+                }
+                Log.e("addChips", "Adding chip: $str")
+                // Set the checked state based on the notes list
+                chips.addView(chip)
+                if (notes.any { it.equals(str, ignoreCase = true) }) {
+                    Log.e("addChips", "Adding IFF : $str")
+                    chip.isChecked = true
+                }
+            }
+        }
+
         // Helper function to create a Chip
-        private fun createChip(activity: Activity, text: String, listener: CompoundButton.OnCheckedChangeListener): Chip {
+        private fun createChip(
+            activity: Activity,
+            text: String,
+            listener: CompoundButton.OnCheckedChangeListener
+        ): Chip {
             return Chip(activity).apply {
                 this.text = text
                 setBackgroundResource(R.drawable.layout_rounded_corner_sp_inst)
@@ -583,7 +692,6 @@ class Utils {
         }
 
 
-
         fun getColors(context: Context, color: Int): Int {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 context.resources.getColor(color, null)
@@ -591,5 +699,96 @@ class Utils {
                 context.resources.getColor(color)
             }
         }
+
+        /**
+         * Parses a date string in "yyyy-MM-dd HH:mm:ss" format and converts it to epoch milliseconds.
+         *
+         * CRITICAL: This function assumes the server time is in UTC. If it's in a different
+         * timezone, the ZoneId must be changed to match (e.g., ZoneId.systemDefault()).
+         *
+         * @param timestampString The date string from the API.
+         * @return The epoch milliseconds as a Long, or 0L if parsing fails.
+         */
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun parseTimestampStringToMillis(timestampString: String?): Long {
+            if (timestampString.isNullOrBlank()) {
+                return 0L
+            }
+
+            // 1. Define the exact format of the incoming string.
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+            return try {
+                // 2. Parse the string into a LocalDateTime object (which has no timezone).
+                val localDateTime = LocalDateTime.parse(timestampString, formatter)
+
+                // 3. Convert it to a ZonedDateTime, assuming the server time is UTC. This is vital for accuracy.
+                val zonedDateTime = localDateTime.atZone(ZoneId.of("IST"))
+
+                // 4. Get the final value in milliseconds since the epoch.
+                zonedDateTime.toInstant().toEpochMilli()
+
+            } catch (e: DateTimeParseException) {
+                // If the string is in an unexpected format, log the error and return 0.
+                e.printStackTrace()
+                0L
+            }
+        }
+
+
+        /**
+         * Determines the current serving status and duration of an order item.
+         *
+         * @param row The data object for the item, which includes a `created_at` string.
+         * @param serviceTimeMinutes The maximum allowed service time for this item in minutes.
+         * @return A Pair containing the calculated ItemServingStatus and the duration in minutes.
+         */
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun determineItemStatus(
+            row: ItemQSR,
+            serviceTimeMinutes: Int
+        ): Pair<ItemServingStatus, Int> {
+            // Case 1: The item is already marked as delivered. This logic does not change.
+            if (row.isd != 0) {
+                return Pair(ItemServingStatus.DELIVERED, row.dtd ?: 0)
+            }
+
+            // Case 2: The item is NOT delivered. Calculate its current state.
+            // *** THIS IS THE ONLY PART THAT CHANGES ***
+            val orderTimestampMillis = parseTimestampStringToMillis(row.created_at)
+
+            if (orderTimestampMillis == 0L) {
+                // If parsing failed or there's no timestamp, default to a safe state.
+                return Pair(ItemServingStatus.WITHIN_SERVICE_TIME, 0)
+            }
+
+            // The rest of the logic is identical to before.
+            val elapsedMilliseconds = System.currentTimeMillis() - orderTimestampMillis
+            val elapsedMinutes = (elapsedMilliseconds / 60000).toInt()
+
+            return if (elapsedMinutes <= serviceTimeMinutes) {
+                Pair(ItemServingStatus.WITHIN_SERVICE_TIME, elapsedMinutes)
+            } else {
+                Pair(ItemServingStatus.BEYOND_SERVICE_TIME, elapsedMinutes)
+            }
+        }
     }
+
+
 }
+
+enum class ItemServingStatus {
+    DELIVERED,
+    WITHIN_SERVICE_TIME,
+    BEYOND_SERVICE_TIME
+}
+
+// A data class to hold all the information the dialog needs
+data class ItemStatusDetails(
+    val itemName: String,
+    val quantity: Int,
+    val status: ItemServingStatus,
+    val specialInstructions: String?,
+    val serviceTimeMinutes: Int,
+    val durationMinutes: Int
+)

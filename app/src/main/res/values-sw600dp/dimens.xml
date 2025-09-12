@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="stoke_width">1dp</dimen>    <!-- Dimensions for Tablet Layout -->
+    <dimen name="table_item_width">120dp</dimen>
+    <dimen name="table_item_height">100dp</dimen>
+    <dimen name="table_item_margin">8dp</dimen>
+    <dimen name="table_item_corner_radius">12dp</dimen>
+    <dimen name="table_item_icon_size">32dp</dimen>
+    <dimen name="table_item_text_size">16sp</dimen>
+    <dimen name="table_item_stroke_width">1dp</dimen>
+    <dimen name="table_item_stroke_width_active">2dp</dimen>
+
+
+    <!-- Generic Dialog Spacing -->
+    <dimen name="dialog_margin_small">12dp</dimen>
+    <dimen name="dialog_padding_medium">14dp</dimen>
+    <dimen name="dialog_padding_large">24dp</dimen>
+    <dimen name="dialog_element_spacing">16dp</dimen>
+
+    <!-- Header -->
+    <dimen name="dialog_header_text_size">20sp</dimen>
+
+    <!-- Quantity Selector -->
+    <dimen name="dialog_qty_button_size">36dp</dimen>
+    <dimen name="dialog_qty_icon_size">18dp</dimen>
+    <dimen name="dialog_qty_text_size">18sp</dimen>
+    <dimen name="dialog_qty_text_min_ems">5
+    </dimen> <!-- Can be smaller ems because text is bigger -->
+
+    <!-- Price -->
+    <dimen name="dialog_price_text_size">18sp</dimen>
+
+    <!-- Special Instructions -->
+    <dimen name="dialog_instruction_title_size">16sp</dimen>
+    <dimen name="dialog_instruction_input_size">18sp</dimen>
+    <dimen name="dialog_instruction_input_height">150dp</dimen>
+
+    <!-- NCV Buttons -->
+    <dimen name="dialog_ncv_button_text_size">16sp</dimen>
+
+    <!-- Action Buttons (Bottom) -->
+    <dimen name="dialog_action_button_margin_vertical">12dp</dimen>
+
+
+    <dimen name="dialog_reconnect_padding">24dp</dimen>
+    <dimen name="dialog_reconnect_title_text_size">22sp</dimen>
+    <dimen name="dialog_reconnect_title_margin_top">24dp</dimen>
+    <dimen name="dialog_reconnect_message_text_size">18sp</dimen>
+    <dimen name="dialog_reconnect_message_margin_top">32dp</dimen>
+    <dimen name="dialog_reconnect_button_height">56dp</dimen>
+    <dimen name="dialog_reconnect_button_margin_vertical">32dp</dimen>
+    <dimen name="dialog_reconnect_button_spacing">16dp</dimen>
+
+
+    <!-- In res/values-sw600dp/dimens.xml -->
+    <dimen name="dialog_status_padding">24dp</dimen>
+    <dimen name="dialog_status_padding_large">32dp</dimen>
+    <dimen name="dialog_status_item_name_text_size">24sp</dimen>
+    <dimen name="dialog_status_quantity_text_size">20sp</dimen>
+    <dimen name="dialog_status_status_text_size">18sp</dimen>
+    <dimen name="dialog_status_label_text_size">16sp</dimen>
+    <dimen name="dialog_status_content_text_size">17sp</dimen>
+    <dimen name="dialog_status_info_card_padding">16dp</dimen>
+    <dimen name="dialog_status_info_card_corner_radius">16dp</dimen>
+    <dimen name="dialog_status_info_card_title_size">14sp</dimen>
+    <dimen name="dialog_status_info_card_value_size">18sp</dimen>
+
+
+
+    <!-- Font Sizes for tablets (slightly larger for readability) -->
+    <dimen name="kot_card_title_size">15sp</dimen>
+    <dimen name="kot_card_time_size">13sp</dimen>
+    <dimen name="kot_item_name_size">14sp</dimen>
+    <dimen name="kot_item_details_size">12sp</dimen>
+    <dimen name="kot_more_items_text_size">13sp</dimen>
+
+    <!-- Spacing & Sizing for tablets (more whitespace) -->
+    <dimen name="card_margin">12dp</dimen>
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="kot_card_min_height">280dp</dimen>
+
+
+    <!-- Login Screen - Tablet Overrides -->
+    <dimen name="login_horizontal_margin">64dp</dimen>
+    <dimen name="login_logo_margin_top">100dp</dimen>
+    <dimen name="login_title_text_size">28sp</dimen>
+    <dimen name="login_instruction_text_size">18sp</dimen>
+    <dimen name="login_button_text_size">18sp</dimen>
+
+    <!-- Tablet-specific value -->
+    <dimen name="login_content_max_width">450dp</dimen>
+
+
+    <!-- More generous spacing for tablets -->
+    <dimen name="login_instruction_number_width">24dp</dimen>
+    <dimen name="login_instruction_text_margin_start">12dp</dimen>
+    <dimen name="login_instruction_subtext_margin_start">36dp</dimen> <!-- number_width + text_margin_start -->
+    <dimen name="login_instruction_subtext_size">16sp</dimen>
+
+
+
+
+    <!-- Customer Details Dialog - TABLET OVERRIDES -->
+    <dimen name="dialog_customer_padding">32dp</dimen>
+    <dimen name="dialog_customer_inner_padding">24dp</dimen>
+    <dimen name="dialog_customer_title_text_size">22sp</dimen>
+    <dimen name="dialog_customer_field_margin_top">20dp</dimen>
+    <dimen name="dialog_customer_button_text_size">16sp</dimen>
+    <dimen name="dialog_customer_pax_field_width">120dp</dimen>
+
+
+
+    <!-- Tablet-specific overrides for the Alert/Confirmation Dialog -->
+    <dimen name="dialog_alert_padding">24dp</dimen>
+    <dimen name="dialog_alert_icon_size">64dp</dimen>
+    <dimen name="dialog_alert_title_text_size">22sp</dimen>
+    <dimen name="dialog_alert_title_margin_top">24dp</dimen>
+    <dimen name="dialog_alert_message_text_size">18sp</dimen>
+    <dimen name="dialog_alert_message_margin_top">32dp</dimen>
+    <dimen name="dialog_alert_button_height">56dp</dimen>
+    <dimen name="dialog_alert_button_container_margin_top">32dp</dimen>
+    <dimen name="dialog_alert_button_spacing">16dp</dimen>
+</resources>

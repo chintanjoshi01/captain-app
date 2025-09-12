@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_50sdp"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:layout_marginTop="@dimen/_6sdp"
+        android:layout_marginEnd="@dimen/_6sdp"
+        android:layout_marginBottom="@dimen/_6sdp"
+        app:cardBackgroundColor="@color/color_white"
+        app:cardCornerRadius="@dimen/_6sdp"
+        app:cardElevation="@dimen/_3sdp">
+
+        <!-- YOUR ORIGINAL RelativeLayout IS PRESERVED FOR CORRECT POSITIONING -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <!--
+                THIS IS THE KEY CHANGE:
+                A new LinearLayout to group the icon and text.
+                IT is now the new center anchor point for your other views.
+            -->
+            <LinearLayout
+                android:id="@+id/item_content_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:orientation="vertical"
+                tools:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/img_dine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_dine_in"
+                    app:tint="@color/color_pendingItem_LightRed" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/txt_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/_6sdp"
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/nunito_semibold"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="@dimen/_10sdp"
+                    tools:text="T1" />
+
+            </LinearLayout>
+
+            <!--
+                YOUR ORIGINAL OVERLAYS.
+                Their anchors are updated to point to the new 'item_content_layout'
+                instead of just 'img_dine'.
+            -->
+
+
+            <ImageView
+                android:id="@+id/img_blink"
+                android:layout_width="9dp"
+                android:layout_height="9dp"
+                android:layout_alignTop="@+id/item_content_layout"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="-10dp"
+                android:src="@drawable/ic_blue_circle"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

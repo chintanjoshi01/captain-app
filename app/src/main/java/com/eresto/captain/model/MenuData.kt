@@ -50,7 +50,9 @@ data class Item(
     var tax_tmpl_mast_id: Int,
     var menu_cat_id: String,
     var kot_ncv: Int,
-    var item_tax: String?
+    var item_tax: String?,
+    var isSoftDelete : Boolean = true,
+    var isEdit : Boolean = false
 )
 
 

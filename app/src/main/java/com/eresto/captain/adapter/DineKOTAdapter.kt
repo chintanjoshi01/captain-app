@@ -20,6 +20,8 @@ import com.eresto.captain.databinding.ItemTakeawayOrderKotListBinding
 import com.eresto.captain.databinding.ItemTakeawayOrderSubItemsListBinding
 import com.eresto.captain.model.ItemQSR
 import com.eresto.captain.model.KotInstance
+import com.eresto.captain.utils.DBHelper
+import com.eresto.captain.utils.ItemServingStatus
 import com.eresto.captain.utils.Utils
 import org.json.JSONArray
 import org.json.JSONException
@@ -32,6 +34,7 @@ class DineKOTAdapter(
     var isUpdate: Boolean,
     var isDelete: Boolean,
     var menuList: List<Any>,
+    var database: DBHelper,
     var setOnItemClick: SetOnItemClick?
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -106,7 +109,7 @@ class DineKOTAdapter(
             holder.textOrder.text = "#${row.instance}"
             holder.txtTime.text = Utils.getAgoTimeShort(row.kot_order_date)
 
-            if (row.soft_delete == 1){
+            if (row.soft_delete == 1) {
                 holder.layout.visibility = View.GONE
             }
 
@@ -128,6 +131,7 @@ class DineKOTAdapter(
                         isUpdate,
                         isDelete,
                         row.item,
+                        database,
                         object :
                             DineKOTAdapter.SetOnItemClick {
                             override fun onItemChecked(
@@ -189,7 +193,7 @@ class DineKOTAdapter(
             }
 
             holder.upArrowImg.setOnClickListener {
-                if (setOnItemClick != null) setOnItemClick!!.onPrintKOT(position, row)
+                if (setOnItemClick != null) setOnItemClick!!.onKOTEdit(position, row)
             }
             holder.layout.setOnClickListener {
                 if (row.isExpanded) {
@@ -223,7 +227,20 @@ class DineKOTAdapter(
             row.item_name = row.item_name.uppercase(Locale.US)
             (holder as ViewHolderOrderSub).txtSectionName.text = row.item_name
             holder.txtQty!!.text = "x${row.qty}"
-            if (row.soft_delete == 1){
+            // 1. Get the service time.
+            val serviceTime = database.getDeliveryTimeById(row.item_id) ?: 15
+
+            // 2. Use the updated helper function. It now correctly handles the `created_at` string.
+            val (status, duration) = Utils.determineItemStatus(row, serviceTime)
+            if (row.isd != 0) {
+                holder.imageDeleteKotItem.setImageResource(R.drawable.ic_check_circle)
+            } else if (status == ItemServingStatus.WITHIN_SERVICE_TIME) {
+                holder.imageDeleteKotItem.setImageResource(R.drawable.ic_wthin_time)
+            } else if (status == ItemServingStatus.BEYOND_SERVICE_TIME) {
+                holder.imageDeleteKotItem.setImageResource(R.drawable.ic_service_time)
+            }
+
+            if (row.soft_delete == 1) {
                 holder.linerLayout.visibility = View.GONE
             }
             if (row.sp_inst != null && row.sp_inst != "" && row.sp_inst != "[\"\"]") {
@@ -263,12 +280,12 @@ class DineKOTAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (menuList[position] is KotInstance) {
-            return Utils.CATEGORY
+        return if (menuList[position] is KotInstance) {
+            Utils.CATEGORY
         } else if (menuList[position] is ItemQSR) {
-            return Utils.ITEMS
+            Utils.ITEMS
         } else {
-            return Utils.CATEGORY
+            Utils.CATEGORY
         }
     }
 

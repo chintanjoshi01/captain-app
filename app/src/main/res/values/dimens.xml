@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <dimen name="stoke_width">0.5dp</dimen>
+
     <!-- standard metrics -->
     <dimen name="spacing_large">32dp</dimen>
     <dimen name="spacing_xxlarge">74dp</dimen>
@@ -40,5 +42,115 @@
     <dimen name="toolbar_back_icon_size">@dimen/_28sdp</dimen>
     <dimen name="border_width_chips">@dimen/_1sdp</dimen>
     <dimen name="border_corner_chips">@dimen/_5sdp</dimen>
+
+
+
+    <!-- Dimensions for Phone Layout -->
+    <dimen name="table_item_width">95dp</dimen>
+    <dimen name="table_item_height">85dp</dimen>
+    <dimen name="table_item_margin">6dp</dimen>
+    <dimen name="table_item_corner_radius">10dp</dimen>
+    <dimen name="table_item_icon_size">28dp</dimen>
+    <dimen name="table_item_text_size">14sp</dimen>
+    <dimen name="table_item_stroke_width">1dp</dimen>
+    <dimen name="table_item_stroke_width_active">2dp</dimen>
+
+
+
+    <!-- Generic Dialog Spacing -->
+    <dimen name="dialog_margin_small">6dp</dimen>
+    <dimen name="dialog_padding_medium">8dp</dimen>
+    <dimen name="dialog_padding_large">16dp</dimen>
+    <dimen name="dialog_element_spacing">10dp</dimen>
+
+    <!-- Header -->
+    <dimen name="dialog_header_text_size">14sp</dimen>
+
+    <!-- Quantity Selector -->
+    <dimen name="dialog_qty_button_size">24dp</dimen>
+    <dimen name="dialog_qty_icon_size">12dp</dimen>
+    <dimen name="dialog_qty_text_size">12sp</dimen>
+    <dimen name="dialog_qty_text_min_ems">6</dimen>
+
+    <!-- Price -->
+    <dimen name="dialog_price_text_size">12sp</dimen>
+
+    <!-- Special Instructions -->
+    <dimen name="dialog_instruction_title_size">12sp</dimen>
+    <dimen name="dialog_instruction_input_size">12sp</dimen>
+    <dimen name="dialog_instruction_input_height">100dp</dimen>
+
+    <!-- NCV Buttons -->
+    <dimen name="dialog_ncv_button_text_size">10sp</dimen>
+
+    <!-- Action Buttons (Bottom) -->
+    <dimen name="dialog_action_button_margin_vertical">8dp</dimen>
+
+
+    <dimen name="dialog_reconnect_padding">12dp</dimen>
+    <dimen name="dialog_reconnect_title_text_size">18sp</dimen>
+    <dimen name="dialog_reconnect_title_margin_top">16dp</dimen>
+    <dimen name="dialog_reconnect_message_text_size">14sp</dimen>
+    <dimen name="dialog_reconnect_message_margin_top">24dp</dimen>
+    <dimen name="dialog_reconnect_button_height">48dp</dimen>
+    <dimen name="dialog_reconnect_button_margin_vertical">24dp</dimen>
+    <dimen name="dialog_reconnect_button_spacing">8dp</dimen>
+
+
+    <!-- In res/values/dimens.xml -->
+    <dimen name="dialog_status_padding">16dp</dimen>
+    <dimen name="dialog_status_padding_large">24dp</dimen>
+    <dimen name="dialog_status_item_name_text_size">20sp</dimen>
+    <dimen name="dialog_status_quantity_text_size">16sp</dimen>
+    <dimen name="dialog_status_status_text_size">16sp</dimen>
+    <dimen name="dialog_status_label_text_size">14sp</dimen>
+    <dimen name="dialog_status_content_text_size">15sp</dimen>
+    <dimen name="dialog_status_info_card_padding">12dp</dimen>
+    <dimen name="dialog_status_info_card_corner_radius">12dp</dimen>
+    <dimen name="dialog_status_info_card_title_size">12sp</dimen>
+    <dimen name="dialog_status_info_card_value_size">16sp</dimen>
+
+
+
+    <!-- Font Sizes -->
+    <dimen name="kot_card_title_size">14sp</dimen>
+    <dimen name="kot_card_time_size">12sp</dimen>
+    <dimen name="kot_item_name_size">14sp</dimen>
+    <dimen name="kot_item_details_size">11sp</dimen>
+    <dimen name="kot_more_items_text_size">12sp</dimen>
+
+    <!-- Spacing & Sizing -->
+    <dimen name="card_margin">8dp</dimen>
+    <dimen name="card_corner_radius">8dp</dimen>
+    <dimen name="kot_card_min_height">250dp</dimen>
+
+
+    <!-- Login Screen -->
+    <dimen name="login_horizontal_margin">32dp</dimen>
+    <dimen name="login_logo_margin_top">60dp</dimen>
+    <dimen name="login_title_text_size">22sp</dimen>
+    <dimen name="login_instruction_text_size">16sp</dimen>
+    <dimen name="login_button_text_size">16sp</dimen>
+
+
+    <!-- Customer Details Dialog - PHONE -->
+    <dimen name="dialog_customer_padding">16dp</dimen>
+    <dimen name="dialog_customer_inner_padding">12dp</dimen>
+    <dimen name="dialog_customer_title_text_size">18sp</dimen>
+    <dimen name="dialog_customer_field_margin_top">12dp</dimen>
+    <dimen name="dialog_customer_button_text_size">14sp</dimen>
+    <dimen name="dialog_customer_pax_field_width">90dp</dimen>
+
+    <dimen name="dialog_alert_padding">16dp</dimen>
+    <dimen name="dialog_alert_icon_size">48dp</dimen>
+    <dimen name="dialog_alert_title_text_size">18sp</dimen>
+    <dimen name="dialog_alert_title_margin_top">16dp</dimen>
+    <dimen name="dialog_alert_message_text_size">14sp</dimen>
+    <dimen name="dialog_alert_message_margin_top">24dp</dimen>
+    <dimen name="dialog_alert_button_height">48dp</dimen>
+    <dimen name="dialog_alert_button_container_margin_top">24dp</dimen>
+    <dimen name="dialog_alert_button_spacing">8dp</dimen>
+
+
 
 </resources>

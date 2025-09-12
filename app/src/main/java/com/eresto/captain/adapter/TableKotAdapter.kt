@@ -14,12 +14,12 @@ import com.eresto.captain.model.Item
 import com.eresto.captain.model.MenuData
 import com.eresto.captain.utils.DBHelper
 import com.eresto.captain.utils.Utils
-import com.eresto.captain.adapter.TableKotChildAdapter
 
 class TableKotAdapter(
     var context: Context,
     var menuList: List<MenuData>,
-    var setOnItemClick: SetOnItemClick?
+    var setOnItemClick: SetOnItemClick?,
+    val isEditOrder: Boolean = false
 ) : RecyclerView.Adapter<TableKotAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemViewkotHeaderBinding) :
@@ -71,7 +71,7 @@ class TableKotAdapter(
                 override fun onItemUpdate(position: Int, item: Item, values: Int) {
                     setOnItemClick!!.onItemUpdate(holder.adapterPosition, item, row, values)
                 }
-            })
+            }, isEditOrder = isEditOrder)
             holder.binding.recyclerviewItem.adapter = adapter
         }
 
@@ -84,6 +84,8 @@ class TableKotAdapter(
                 holder.binding.recyclerviewItem.visibility = View.VISIBLE
             }
         }
+
+
     }
 
     fun setItemList(list: List<MenuData>) {
@@ -98,9 +100,9 @@ class TableKotAdapter(
     fun refreshList(tableId: Int, position: Int) {
         val db = DBHelper(context)
         val tableItemList: List<CartItemRow> = db.GetCartItems(tableId)
-        var mPosition=position
+        var mPosition = position
         /**Check all item false*/
-        if(mPosition==-1) {
+        if (mPosition == -1) {
             for (cat in menuList) {
                 for (item in cat.items) {
                     item.isChecked = false
@@ -116,10 +118,14 @@ class TableKotAdapter(
             for (table in tableItemList) {
                 for (item in cat.items) {
                     if (table.id == item.id) {
-                        if(item.item_cat_id==-1){
-                            mPosition=-1
+                        if (item.item_cat_id == -1) {
+                            mPosition = -1
                         }
-                        item.isChecked = true
+                        if(item.isSoftDelete) {
+                            item.isChecked =false
+                        } else {
+                            item.isChecked = true
+                        }
                         item.count = table.qty
                         item.kot_ncv = table.kot_ncv
                         item.localId = table.id

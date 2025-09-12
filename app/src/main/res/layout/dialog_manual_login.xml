@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+
+<androidx.cardview.widget.CardView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="24dp"
+    app:cardBackgroundColor="#F7F7F7"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:fontFamily="@font/nunito_bold"
+                android:text="Manual Login"
+                android:textColor="@color/blackText1"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/close_button"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:padding="4dp"
+                android:src="@drawable/ic_close_icon" />
+        </RelativeLayout>
+
+        <!-- IP Address -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/nunito_regular"
+            android:text="IP Address"
+            android:textColor="@color/blackText1"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/ip_address_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/edit_text_border"
+            android:fontFamily="@font/nunito_regular"
+            android:hint="Enter IP Address"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColorHint="#A9A9A9"
+            android:textSize="14sp" />
+
+        <!-- Port Number -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/nunito_regular"
+            android:text="Port Number"
+            android:textColor="@color/blackText1"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/port_number_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/edit_text_border"
+            android:fontFamily="@font/nunito_regular"
+            android:hint="Enter Port Number"
+            android:inputType="number"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColorHint="#A9A9A9"
+            android:textSize="14sp" />
+
+        <!-- Wi-Fi SSID -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/nunito_regular"
+            android:text="Wi-Fi SSID"
+            android:textColor="@color/blackText1"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/wifi_ssid_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/edit_text_border"
+            android:fontFamily="@font/nunito_regular"
+            android:hint="Enter Wi-Fi Network Name"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColorHint="#A9A9A9"
+            android:textSize="14sp" />
+
+        <!-- User ID -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/nunito_regular"
+            android:text="User ID"
+            android:textColor="@color/blackText1"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/user_id_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/edit_text_border"
+            android:fontFamily="@font/nunito_regular"
+            android:hint="Enter User ID"
+            android:inputType="number"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColorHint="#A9A9A9"
+            android:textSize="14sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/login_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/rounded_corner_red"
+            android:fontFamily="@font/nunito_bold"
+            android:text="LOGIN"
+            android:textAllCaps="false"
+            android:textColor="@color/color_white"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+
+</FrameLayout>

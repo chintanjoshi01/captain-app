@@ -1,58 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/colorSecondaryVariant_light2"
-    android:orientation="vertical"
-    tools:ignore="MissingConstraints">
+    android:background="@color/color_white"
+    android:orientation="vertical">
+
+    <!-- Header Toolbar matching the design -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/color_white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_user_avatar"
-        app:navigationContentDescription="@string/logout"
-        android:contentDescription="@string/logout"
-        app:tabTextAppearance="@style/tabTextAppearance"
-        app:titleTextColor="@color/colorSecondary" />
+        app:contentInsetStart="0dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/color_white"
-        app:elevation="0dp"
-        android:visibility="gone"
-        app:tabIndicatorColor="@color/colorPrimary"
-        app:tabSelectedTextColor="@color/colorPrimary"
-        app:tabTextAppearance="@style/tabTextAppearance"
-        app:tabTextColor="@color/colorSecondaryVariant"
-        tools:ignore="MissingConstraints">
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Details" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Permission" />
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Report" />
-    </com.google.android.material.tabs.TabLayout>
+            <!-- Logo Image -->
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_eresto_side"
+                android:visibility="gone" />
 
+            <TextView
+                android:id="@+id/tvRestoName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/nunito_semibold"
+                android:text="Cafe Resto"
+                android:textColor="@color/blackText1"
+                android:textSize="@dimen/_15ssp" />
+
+            <!-- User Avatar for Logout -->
+            <ImageView
+                android:id="@+id/iv_user_avatar"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:contentDescription="@string/logout"
+                android:src="@drawable/ic_user_avatar" />
+
+        </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- Separator Line -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/colorSecondaryVariant_light" />
 
+    <!-- Empty State View -->
     <LinearLayout
         android:id="@+id/lin_no"
         android:layout_width="match_parent"
@@ -87,19 +96,21 @@
             android:textSize="@dimen/_14sdp" />
     </LinearLayout>
 
+    <!-- Table Grid -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@color/color_white">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_table2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/_4sdp"
-            android:layout_marginRight="@dimen/_4sdp"
             android:clipToPadding="false"
+            android:paddingStart="12dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="12dp"
             android:paddingBottom="@dimen/_80sdp" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

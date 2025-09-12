@@ -11,10 +11,10 @@
 
 
     <ImageView
-        android:layout_gravity="center"
         android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginTop="@dimen/_40sdp"
         android:src="@drawable/ic_logo" />
 
@@ -72,7 +72,7 @@
                     android:gravity="center"
                     android:text="1."
                     android:textColor="@color/colorPrimary"
-                     android:textSize="@dimen/_14ssp"
+                    android:textSize="@dimen/_14ssp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -80,7 +80,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_5sdp"
                     android:fontFamily="@font/nunito_regular"
-                    android:text="Open Eresto POS"
+                    android:text="Open Eresto Edge"
                     android:textColor="@color/blackText1"
                     android:textSize="@dimen/_14ssp" />
             </LinearLayout>
@@ -95,12 +95,12 @@
                 <TextView
                     android:layout_width="@dimen/_18sdp"
                     android:layout_height="@dimen/_18sdp"
-                     android:textColor="@color/colorPrimary"
                     android:fontFamily="@font/nunito_regular"
                     android:gravity="center"
                     android:text="2."
-                     
-                     android:textSize="@dimen/_14ssp"
+                    android:textColor="@color/colorPrimary"
+
+                    android:textSize="@dimen/_14ssp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -122,12 +122,12 @@
                 <TextView
                     android:layout_width="@dimen/_18sdp"
                     android:layout_height="@dimen/_18sdp"
-                     android:textColor="@color/colorPrimary"
                     android:fontFamily="@font/nunito_regular"
                     android:gravity="center"
                     android:text="3."
+                    android:textColor="@color/colorPrimary"
 
-                     android:textSize="@dimen/_14ssp"
+                    android:textSize="@dimen/_14ssp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -137,7 +137,7 @@
                     android:fontFamily="@font/nunito_regular"
                     android:text="It will show a QR Code"
                     android:textColor="@color/blackText1"
-                    android:textSize="@dimen/_14ssp"  />
+                    android:textSize="@dimen/_14ssp" />
             </LinearLayout>
 
             <LinearLayout
@@ -149,12 +149,12 @@
                 <TextView
                     android:layout_width="@dimen/_18sdp"
                     android:layout_height="@dimen/_18sdp"
-                     android:textColor="@color/colorPrimary"
                     android:fontFamily="@font/nunito_regular"
                     android:gravity="center"
                     android:text="4."
-                     
-                     android:textSize="@dimen/_14ssp"
+                    android:textColor="@color/colorPrimary"
+
+                    android:textSize="@dimen/_14ssp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -169,9 +169,9 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_marginTop="-25dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="-25dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -179,15 +179,16 @@
                     android:layout_height="@dimen/_18sdp"
                     android:fontFamily="@font/nunito_regular"
                     android:gravity="center"
-                     android:textSize="@dimen/_14ssp"
+                    android:textSize="@dimen/_14ssp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_5sdp"
+                    android:layout_marginBottom="@dimen/_5sdp"
                     android:fontFamily="@font/nunito_regular"
-                    android:text="(It will open the camera, Scan the QR Code on POS to Login)"
+                    android:text="(It will open the camera, Scan the QR Code to Login)"
                     android:textColor="@color/blackText2"
                     android:textSize="@dimen/_12ssp" />
             </LinearLayout>
@@ -196,16 +197,35 @@
     </androidx.cardview.widget.CardView>
 
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/connectButton"
-        android:layout_marginTop="@dimen/_60sdp"
+    <!-- THE FIX: Using MaterialButton for perfect alignment -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/qrLoginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginHorizontal="@dimen/_20sdp"
-        android:background="@color/colorPrimary"
-        android:text="LOGIN"
-        android:textColor="@color/color_white"
-        android:textSize="@dimen/_12sdp" />
+        android:layout_marginHorizontal="@dimen/login_horizontal_margin"
+        android:layout_marginTop="30dp"
+        android:paddingVertical="14dp"
+        android:text="QR Login"
+        android:textSize="@dimen/login_button_text_size"
+        app:backgroundTint="@color/colorPrimary"
+        app:cornerRadius="8dp"
+        app:icon="@drawable/ic_qr_code_scan"
+        app:iconGravity="textStart"
+        app:iconPadding="16dp" />
+
+    <!-- Using an Outlined MaterialButton for consistency -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/manualLoginButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/login_horizontal_margin"
+        android:layout_marginTop="12dp"
+        android:paddingVertical="14dp"
+        android:text="Manual Login"
+        android:textColor="@color/blackText1"
+        android:textSize="@dimen/login_button_text_size"
+        app:cornerRadius="8dp"
+        app:strokeColor="@color/colorPrimary" />
 
 </LinearLayout>

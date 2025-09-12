@@ -54,4 +54,39 @@
 
     <color name="color_gray_light_fill">#E2DFE3</color>
     <color name="color_icon_occupied">#80ab2421</color>
+
+    <!-- ADD THESE NEW COLORS FOR THE TABLET UI -->
+    <color name="color_red_occupied">#D32F2F</color>
+    <color name="color_yellow_billed">#FBC02D</color>
+    <color name="color_light_blue_available">#E3F2FD</color>
+    <color name="color_green_running_border">#388E3C</color>
+    <color name="divider_color">#E0E0E0</color>
+    <color name="info_card_background">#F5F5F5</color>
+    <color name="color_delivered_bg">#EDFFEF</color>
+    <color name="color_within_time_bg">#FFF9E6</color>
+    <color name="color_beyond_time_bg">#FFE9E6</color>
+
+
+    <!-- Free Table (.free-tbl) -->
+    <color name="table_free_background">#FFE4F5FF</color>
+    <color name="table_free_border">#FF4E4E4E</color>
+
+    <!-- Running/Occupied Table (.running-tbl) -->
+    <color name="table_running_background">#FFFBE9E7</color>
+    <!-- The original CSS value #E3584A40 has 25% opacity (40 in hex).
+         Android's AARRGGBB format requires the alpha value at the start. -->
+    <color name="table_running_border">#40E3584A</color>
+
+    <!-- Pending RC Table (.pending-rc-tbl) -->
+    <color name="table_pending_rc_background">#FFFFF895</color>
+    <color name="table_pending_rc_border">#FFF4B920</color>
+
+    <!-- Reserve Table (.reserve-tbl) -->
+    <color name="table_reserve_background_and_border">#FF4C4C4C</color>
+    <color name="table_reserve_text_and_icon">#FFFFFFFF</color>
+
+    <!-- Close Table (.close-tbl) -->
+    <color name="table_closed_background">#FFAB2421</color>
+    <color name="table_closed_text">#FFFFFFFF</color>
+
 </resources>

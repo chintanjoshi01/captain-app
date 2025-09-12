@@ -11,6 +11,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@drawable/drawable_round_rectangle"
         app:contentInsetStartWithNavigation="0dp"
+        app:title="View KOT"
         app:layout_constraintTop_toTopOf="parent"
         app:titleTextColor="@color/color_white">
 
@@ -27,7 +28,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/_250sdp"
         android:layout_below="@+id/toolbar"
         android:paddingTop="@dimen/_4sdp"
         android:scrollbars="none" />

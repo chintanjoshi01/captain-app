@@ -1,104 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/card"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_70sdp"
         android:layout_marginStart="@dimen/_6sdp"
         android:layout_marginTop="@dimen/_6sdp"
-        app:cardBackgroundColor="@color/color_white"
         android:layout_marginEnd="@dimen/_6sdp"
         android:layout_marginBottom="@dimen/_6sdp"
+        app:cardBackgroundColor="@color/color_white"
         app:cardCornerRadius="@dimen/_6sdp"
         app:cardElevation="@dimen/_3sdp">
 
+        <!-- YOUR ORIGINAL RelativeLayout IS PRESERVED FOR CORRECT POSITIONING -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@+id/img_delete"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:gravity="center">
 
-            <RelativeLayout
-                android:id="@+id/rel_cust"
+            <!--
+                THIS IS THE KEY CHANGE:
+                A new LinearLayout to group the icon and text.
+                IT is now the new center anchor point for your other views.
+            -->
+            <LinearLayout
+                android:id="@+id/item_content_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/img_dine"
-                android:visibility="gone"
-                android:layout_alignBottom="@+id/img_dine"
-                android:layout_marginTop="@dimen/_1sdp"
-                android:layout_marginEnd="@dimen/_4sdp"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginBottom="@dimen/_1sdp"
-                android:layout_toEndOf="@+id/img_dine"
-                android:orientation="vertical">
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:orientation="vertical"
+                tools:orientation="horizontal">
 
-                <View
+                <ImageView
+                    android:id="@+id/img_dine"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_alignStart="@+id/cust_order"
-                    android:layout_alignTop="@+id/cust_order"
-                    android:layout_alignEnd="@+id/cust_order"
-                    android:layout_alignBottom="@+id/cust_order"
-                    android:background="@drawable/shape_red"
-                    android:backgroundTint="@color/colorPrimary" />
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_dine_in"
+                    app:tint="@color/color_pendingItem_LightRed" />
 
-
-                <TextView
-                    android:id="@+id/cust_order"
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/txt_name"
+                    android:layout_gravity="center"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_6sdp"
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/nunito_semibold"
                     android:gravity="center"
-                    android:lines="1"
-                    android:text="5"
-                    android:minEms="2"
-                    android:maxEms="2"
-                    android:textColor="@color/color_white"
-                    android:textSize="@dimen/_12sdp" />
+                    android:singleLine="true"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="@dimen/_14sdp"
+                    tools:text="T1"/>
 
-            </RelativeLayout>
+            </LinearLayout>
+
+            <!--
+                YOUR ORIGINAL OVERLAYS.
+                Their anchors are updated to point to the new 'item_content_layout'
+                instead of just 'img_dine'.
+            -->
+
 
             <ImageView
                 android:id="@+id/img_blink"
                 android:layout_width="9dp"
                 android:layout_height="9dp"
-                android:visibility="gone"
-                android:layout_above="@+id/img_dine"
-                android:layout_centerInParent="true"
-                android:layout_marginBottom="-6dp"
-                android:src="@drawable/ic_blue_circle" />
-
-            <ImageView
-                android:id="@+id/img_dine"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:src="@drawable/ic_dine_in"
-                app:tint="@color/color_pendingItem_LightRed" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/txt_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/img_dine"
+                android:layout_alignTop="@+id/item_content_layout"
                 android:layout_centerHorizontal="true"
-                android:layout_marginStart="@dimen/_6sdp"
-                android:layout_marginEnd="@dimen/_6sdp"
-                android:ellipsize="end"
-                android:fontFamily="@font/nunito_bold"
-                android:gravity="center"
-                android:singleLine="true"
-                android:textColor="@color/colorSecondary"
-                android:textSize="@dimen/_14sdp" />
+                android:layout_marginTop="-10dp"
+                android:src="@drawable/ic_blue_circle"
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
         </RelativeLayout>
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

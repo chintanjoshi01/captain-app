@@ -3,33 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/_5sdp"
-    android:orientation="vertical"
-    android:padding="@dimen/_5sdp">
+    android:orientation="vertical">
 
+    <!-- This root padding provides consistent spacing from the dialog edges -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/_8sdp">
+        android:padding="@dimen/dialog_reconnect_padding">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="visible"
             app:srcCompat="@drawable/ic_pos_setting" />
 
         <TextView
             android:id="@+id/txt_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_12sdp"
+            android:layout_marginTop="@dimen/dialog_reconnect_title_margin_top"
             android:fontFamily="@font/nunito_bold"
             android:gravity="center"
             android:textColor="@color/colorSecondary"
-            android:textSize="@dimen/_15sdp"
+            android:textSize="@dimen/dialog_reconnect_title_text_size"
             android:theme="@style/textInput"
             android:visibility="gone" />
 
@@ -37,46 +35,39 @@
             android:id="@+id/txt_standard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_24sdp"
+            android:layout_marginTop="@dimen/dialog_reconnect_message_margin_top"
             android:gravity="center"
+            android:lineSpacingExtra="4dp"
             android:textColor="@color/colorSecondary"
-            android:textSize="@dimen/_12sdp"
+            android:textSize="@dimen/dialog_reconnect_message_text_size"
             android:theme="@style/textInput" />
 
+        <!-- Button container with improved spacing -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dialog_reconnect_button_margin_vertical"
             android:gravity="center"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/_35sdp"
-                android:layout_gravity="center"
-
-                android:layout_marginStart="@dimen/_16sdp"
-                android:layout_marginTop="@dimen/_24sdp"
-                android:layout_marginBottom="@dimen/_24sdp"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/dialog_reconnect_button_height"
+                android:layout_marginEnd="@dimen/dialog_reconnect_button_spacing"
                 android:layout_weight="1"
                 android:background="@drawable/shape_red_border_round"
-                android:paddingStart="@dimen/_8sdp"
-                android:paddingEnd="@dimen/_8sdp"
-                android:text="Cancel"
+                android:text="@string/cancel"
                 android:textColor="@color/colorPrimary" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_add_session"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/_35sdp"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/_16sdp"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/dialog_reconnect_button_height"
+                android:layout_marginStart="@dimen/dialog_reconnect_button_spacing"
                 android:layout_weight="1"
                 android:background="@drawable/shape_red_fill_round"
-                android:paddingStart="@dimen/_8sdp"
-                android:paddingEnd="@dimen/_8sdp"
-                android:text="Continue"
+                android:text="Reconnect"
                 android:textColor="@color/color_white" />
         </LinearLayout>
     </LinearLayout>

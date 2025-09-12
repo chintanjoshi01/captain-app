@@ -6,6 +6,7 @@ data class GetTables(
     var tab_status: Int,
     var tab_label: String,
     val tab_type: Int,
+    val order_type : Int
 )
 
 data class kitCat(

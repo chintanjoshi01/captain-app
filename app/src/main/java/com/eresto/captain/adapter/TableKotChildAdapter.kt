@@ -1,10 +1,12 @@
 package com.eresto.captain.adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.eresto.captain.R
 import com.eresto.captain.databinding.ItemViewkotItemsBinding
@@ -12,12 +14,13 @@ import com.eresto.captain.model.CartItemRow
 import com.eresto.captain.model.Item
 import com.eresto.captain.utils.DBHelper
 import com.eresto.captain.utils.Utils
-import java.util.*
+import java.util.Locale
 
 class TableKotChildAdapter(
     var context: Context,
     var menuList: List<Item>,
-    var setOnItemClick: SetOnItemClick?
+    var setOnItemClick: SetOnItemClick?,
+    var isEditOrder: Boolean = false
 ) : RecyclerView.Adapter<TableKotChildAdapter.ViewHolder>(),
     Filterable {
     var menuFilterList = ArrayList<Item>()
@@ -39,59 +42,73 @@ class TableKotChildAdapter(
 
     override fun onBindViewHolder(holder: TableKotChildAdapter.ViewHolder, position: Int) {
         val row = menuFilterList[position]
-        holder.binding.textItemName.text = row.item_name
+        holder.binding.textItemName?.text = row.item_name
         if (row.isChecked) {
-            holder.binding.imgMinus.visibility = View.VISIBLE
-            holder.binding.count.visibility = View.VISIBLE
+            holder.binding.imgMinus?.visibility = View.VISIBLE
+            holder.binding.count?.visibility = View.VISIBLE
         } else {
-            holder.binding.imgMinus.visibility = View.GONE
-            holder.binding.count.visibility = View.GONE
+            holder.binding.imgMinus?.visibility = View.GONE
+            holder.binding.count?.visibility = View.GONE
         }
-        holder.binding.count.text = row.count.toString()
+        holder.binding.count?.text = row.count.toString()
         if (row.is_fsi == 1) {
-            holder.binding.imageStar.visibility = View.VISIBLE
+            holder.binding.imageStar?.visibility = View.VISIBLE
         } else {
-            holder.binding.imageStar.visibility = View.GONE
+            holder.binding.imageStar?.visibility = View.GONE
         }
         if (row.is_nonveg == 1) {
-            holder.binding.textItemName.setCompoundDrawablesWithIntrinsicBounds(
+            holder.binding.textItemName?.setCompoundDrawablesWithIntrinsicBounds(
                 R.drawable.ic_symbol_nonveg,
                 0,
                 0,
                 0
             )
         } else {
-            holder.binding.textItemName.setCompoundDrawablesWithIntrinsicBounds(
+            holder.binding.textItemName?.setCompoundDrawablesWithIntrinsicBounds(
                 R.drawable.ic_symbol_veg,
                 0,
                 0,
                 0
             )
         }
-        holder.binding.imgPlus.setOnClickListener {
-            holder.binding.imgMinus.visibility = View.VISIBLE
-            holder.binding.count.visibility = View.VISIBLE
+        holder.binding.imgPlus?.setOnClickListener {
+            if (isEditOrder) {
+                row.isSoftDelete = false
+            }
+            holder.binding.imgMinus?.visibility = View.VISIBLE
+            holder.binding.count?.visibility = View.VISIBLE
             row.count += 1
             notifyItemChanged(position)
             setOnItemClick!!.onItemUpdate(position, row, row.count)
         }
-        holder.binding.imgMinus.setOnClickListener {
+        holder.binding.imgMinus?.setOnClickListener {
             row.count -= 1
             notifyItemChanged(position)
             if (row.count > 0) {
                 setOnItemClick!!.onItemUpdate(position, row, row.count)
             } else {
                 row.isChecked = false
-                setOnItemClick!!.onItemDelete(position, row, row.count)
+                if (isEditOrder && row.isEdit) {
+                    row.isSoftDelete = true
+                    setOnItemClick!!.onItemUpdate(position, row, row.count)
+                    holder.binding.imgMinus.visibility = View.VISIBLE
+                    Log.e("jsdasdhas", "soft delete ${row.isSoftDelete}")
+                } else {
+                    setOnItemClick!!.onItemDelete(position, row, row.count)
+                }
                 notifyDataSetChanged()
             }
         }
-        holder.binding.cbCat.visibility = View.GONE
-        holder.binding.llAdd.visibility = View.VISIBLE
-        holder.binding.llAdd.setOnClickListener {
+        holder.binding.cbCat?.visibility = View.GONE
+        holder.binding.llAdd?.visibility = View.VISIBLE
+        holder.binding.tvItemPrice?.text = row.item_price.toString()
+        holder.binding.llAdd?.setOnClickListener {
             setOnItemClick!!.onItemClicked(position, row)
         }
-        holder.binding.llView.setOnClickListener {
+        holder.binding.llView?.setOnClickListener {
+            setOnItemClick!!.onItemClicked(position, row)
+        }
+        holder.binding.viewKot.setOnClickListener {
             setOnItemClick!!.onItemClicked(position, row)
         }
     }

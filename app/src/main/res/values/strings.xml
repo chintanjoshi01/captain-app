@@ -58,7 +58,7 @@
     <string name="lbl_kot_caps">KOT</string>
     <string name="create_invoice">Create Invoice</string>
     <string name="regular">Regular</string>
-    <string name="cust_details">Customer Detials</string>
+    <string name="cust_details">Customer Details</string>
     <string name="mobile_number">Contact No</string>
     <string name="name">Name</string>
     <string name="pax">Pax</string>
@@ -77,6 +77,9 @@
     <string name="step_3">Tap the Login Button below\n</string>
     <string name="profile">Profile</string>
     <string name="logout">Logout</string>
+    <string name="enter_special_instruction">Enter Special Instruction</string>
+    <string name="item_name">Item Name</string>
+    <string name="update">Update</string>
     <string-array name="printer_design_type">
         <item>KOT 1</item>
         <item>KOT 2</item>
@@ -86,4 +89,18 @@
         <item>Direct Print to Default Printer</item>
         <item>Select Printer on Every Print</item>
     </string-array>
+
+
+
+
+    <string name="no_special_instructions">No Special Instructions</string>
+    <string name="service_time">Service Time</string>
+    <string name="duration">Duration</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_within_service_time">Within Service Time</string>
+    <string name="status_beyond_service_time">Beyond Service Time</string>
+    <string name="time_minutes_format">%d Min</string>
+    <string name="item_quantity_format">x%d</string>
+    <string name="close">close</string>
+    <string name="continue_text">Continue</string>
 </resources>
